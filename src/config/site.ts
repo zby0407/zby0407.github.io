@@ -222,8 +222,8 @@ export const site = {
 
     /** Primary accent color. */
     color: {
-      light: '#c45c48' as string,
-      dark: '#d47360' as string,
+      light: '#b8860b' as string,
+      dark: '#d4a843' as string,
     },
   },
 } as const;

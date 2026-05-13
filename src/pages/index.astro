@@ -8,13 +8,14 @@ const posts = (await getCollection('posts'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 6);
 
-// Decorative images for masonry — not tied to posts
+// Decorative images for masonry — not tied to posts.
+// Replace these with your own anime/Holo images by placing them in public/assets/anime/
 const heroImages = [
-  { src: '/assets/img/1.jpg', alt: '' },
-  { src: '/assets/img/5.jpg', alt: '' },
-  { src: '/assets/img/3.jpg', alt: '' },
-  { src: '/assets/img/7.jpg', alt: '' },
-  { src: '/assets/img/9.jpg', alt: '' },
+  { src: 'https://picsum.photos/seed/holo1/600/800', alt: '' },
+  { src: 'https://picsum.photos/seed/holo2/600/900', alt: '' },
+  { src: 'https://picsum.photos/seed/holo3/500/700', alt: '' },
+  { src: 'https://picsum.photos/seed/holo4/600/800', alt: '' },
+  { src: 'https://picsum.photos/seed/holo5/500/700', alt: '' },
 ];
 
 const formatDate = (d: Date) =>
