@@ -51,7 +51,9 @@ const formatDate = (d: Date) =>
             {categories && categories.length > 0 && (
               <>
                 <span>·</span>
-                <span style="color: var(--global-theme-color)">{categories[0]}</span>
+                <a href={`/categories/${categories[0]}/`} style="color: var(--global-theme-color); text-decoration: none;">
+                  {categories[0]}
+                </a>
               </>
             )}
           </div>
@@ -79,12 +81,13 @@ const formatDate = (d: Date) =>
         {tags.length > 0 && (
           <div class="mt-10 pt-6 flex flex-wrap gap-2" style="border-top: 1px solid var(--global-divider-color)">
             {tags.map(tag => (
-              <span
-                class="text-xs px-2 py-1 rounded"
-                style="background: var(--global-card-bg-color); color: var(--global-text-color-light)"
+              <a
+                href={`/tags/${tag}/`}
+                class="text-xs px-2 py-1 rounded transition-colors"
+                style="background: var(--global-card-bg-color); color: var(--global-text-color-light); text-decoration: none;"
               >
                 {tag}
-              </span>
+              </a>
             ))}
           </div>
         )}

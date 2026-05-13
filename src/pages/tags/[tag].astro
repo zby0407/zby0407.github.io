@@ -1,11 +1,22 @@
 ---
-import { site } from '@config/site';
 import Page from '@layouts/Page.astro';
 import { getCollection } from 'astro:content';
 
-const posts = (await getCollection('posts'))
-  .filter((p) => !p.data.hidden && !p.data.draft)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag) && !p.data.hidden && !p.data.draft)
+        .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
+    },
+  }));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
 
 const formatDate = (d: Date) =>
   d.toLocaleDateString('zh-CN', {
@@ -15,10 +26,13 @@ const formatDate = (d: Date) =>
   }).replace(/\//g, '.');
 ---
 
-<Page title={site.blog.name} description={site.blog.description}>
-  <h1 class="text-2xl font-semibold mb-12" style="color: var(--global-text-color)">
-    {site.blog.name}
+<Page title={`标签：${tag}`} description={`包含标签 "${tag}" 的所有文章`}>
+  <h1 class="text-2xl font-semibold mb-2" style="color: var(--global-text-color)">
+    #{tag}
   </h1>
+  <p class="text-sm mb-10" style="color: var(--global-text-color-muted)">
+    共 {posts.length} 篇文章
+  </p>
 
   <div class="space-y-0">
     {
@@ -30,9 +44,9 @@ const formatDate = (d: Date) =>
                 {formatDate(post.data.date)}
               </time>
               {post.data.categories && post.data.categories.length > 0 && (
-                <a href={`/categories/${post.data.categories[0]}/`} class="text-xs" style="color: var(--global-theme-color); text-decoration: none;">
+                <span class="text-xs" style="color: var(--global-theme-color)">
                   {post.data.categories[0]}
-                </a>
+                </span>
               )}
             </div>
             <h2 class="text-lg font-medium mb-2" style="color: var(--global-text-color)">
@@ -51,7 +65,7 @@ const formatDate = (d: Date) =>
 
   {posts.length === 0 && (
     <p style="color: var(--global-text-color-light); padding-top: 2rem;">
-      {site.blog.emptyMessage}
+      没有找到相关文章。
     </p>
   )}
 </Page>
