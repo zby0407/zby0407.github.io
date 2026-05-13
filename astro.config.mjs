@@ -1,7 +1,6 @@
 import mdx from '@astrojs/mdx';
 import partytown from '@astrojs/partytown';
 import react from '@astrojs/react';
-import tailwindcss from '@tailwindcss/vite';
 import icon from 'astro-icon';
 import { defineConfig } from 'astro/config';
 import rehypeExternalLinks from 'rehype-external-links';
@@ -185,7 +184,6 @@ export default defineConfig({
     }),
   ],
   vite: {
-    plugins: [tailwindcss()],
     resolve: {
       alias: {
         '@components': '/src/components',
