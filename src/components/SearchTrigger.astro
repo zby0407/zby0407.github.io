@@ -6,7 +6,7 @@
   id="search-trigger"
   aria-label="搜索"
   title="搜索 (Cmd/Ctrl + K)"
-  style="padding: 0; border: 0; background-color: inherit; color: var(--global-text-color); width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;"
+  style="padding: 0; border: 0; background-color: inherit; color: var(--global-text-color); width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 4px; transition: background-color 0.15s ease;"
 >
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -196,3 +196,9 @@
       .join('');
   });
 </script>
+
+<style>
+  #search-trigger:hover {
+    background-color: var(--global-card-bg-color);
+  }
+</style>
