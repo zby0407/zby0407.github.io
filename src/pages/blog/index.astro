@@ -24,26 +24,48 @@ const formatDate = (d: Date) =>
     {
       posts.map((post) => (
         <article class="py-6" style="border-bottom: 1px solid var(--global-divider-color)">
-          <a href={`/blog/${post.id}/`} class="block group">
-            <div class="flex items-baseline gap-4 mb-2">
-              <time class="text-xs tabular-nums shrink-0" style="color: var(--global-text-color-muted)">
-                {formatDate(post.data.date)}
-              </time>
-              {post.data.categories && post.data.categories.length > 0 && (
-                <a href={`/categories/${post.data.categories[0]}/`} class="text-xs" style="color: var(--global-theme-color); text-decoration: none;">
-                  {post.data.categories[0]}
-                </a>
+          <div class="flex items-start gap-6">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-baseline gap-3 mb-2">
+                <time class="text-xs tabular-nums shrink-0" style="color: var(--global-text-color-muted)">
+                  {formatDate(post.data.date)}
+                </time>
+                {post.data.categories && post.data.categories.length > 0 && (
+                  <a href={`/categories/${post.data.categories[0]}/`} class="text-xs" style="color: var(--global-theme-color); text-decoration: none;">
+                    {post.data.categories[0]}
+                  </a>
+                )}
+              </div>
+              <a href={`/blog/${post.id}/`} class="block group" style="text-decoration: none;">
+                <h2 class="text-lg font-medium mb-2 transition-colors group-hover:text-[var(--global-theme-color)]" style="color: var(--global-text-color)">
+                  {post.data.title}
+                </h2>
+                {post.data.description && (
+                  <p class="text-sm" style="color: var(--global-text-color-light)">
+                    {post.data.description}
+                  </p>
+                )}
+              </a>
+              {post.data.tags && post.data.tags.length > 0 && (
+                <div class="flex gap-2 mt-2">
+                  {post.data.tags.slice(0, 3).map((tag) => (
+                    <a href={`/tags/${tag}/`} class="text-xs" style="color: var(--global-text-color-muted); text-decoration: none;">
+                      {tag}
+                    </a>
+                  ))}
+                </div>
               )}
             </div>
-            <h2 class="text-lg font-medium mb-2" style="color: var(--global-text-color)">
-              {post.data.title}
-            </h2>
-            {post.data.description && (
-              <p class="text-sm" style="color: var(--global-text-color-light)">
-                {post.data.description}
-              </p>
+            {post.data.image && (
+              <a href={`/blog/${post.id}/`} class="hidden md:block shrink-0 w-24 h-16 overflow-hidden rounded-sm">
+                <img
+                  src={post.data.image}
+                  alt=""
+                  class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                />
+              </a>
             )}
-          </a>
+          </div>
         </article>
       ))
     }
