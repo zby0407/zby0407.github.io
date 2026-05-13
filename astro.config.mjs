@@ -136,10 +136,10 @@ export default defineConfig({
           'music',
           'map-pin',
           'hashtag',
-          'magnifying-glass',
+          'search',
           'thumbtack',
           'external-link-alt',
-          'circle-arrow-right',
+          'arrow-circle-right',
           'book-open',
           'check',
           'clock',
@@ -198,6 +198,7 @@ export default defineConfig({
     },
     build: {
       rollupOptions: {
+        external: ['/pagefind/pagefind.js'],
         output: {
           // Shorter, readable asset paths (e.g. _s/abc123.js instead of _astro/abc123.js)
           assetFileNames: '_s/[hash][extname]',

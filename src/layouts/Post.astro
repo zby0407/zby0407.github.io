@@ -1,4 +1,7 @@
 ---
+import Giscus from '@components/Giscus.astro';
+import ReadingProgress from '@components/ReadingProgress.astro';
+import TOC from '@components/TOC.astro';
 import { site } from '@config/site';
 import Base from './Base.astro';
 import type { MarkdownHeading } from 'astro';
@@ -7,9 +10,10 @@ import type { CollectionEntry } from 'astro:content';
 interface Props {
   post: CollectionEntry<'posts'>;
   headings?: MarkdownHeading[];
+  related?: CollectionEntry<'posts'>[];
 }
 
-const { post } = Astro.props;
+const { post, headings = [], related = [] } = Astro.props;
 const {
   title, description, date, lastmod, tags = [], categories = [],
   robots, draft = false,
@@ -30,53 +34,92 @@ const formatDate = (d: Date) =>
 ---
 
 <Base title={title} description={description} robots={effectiveRobots}>
-  <div class="page-container py-12">
-    <article>
-      <!-- Header -->
-      <header class="mb-10">
-        <div class="flex items-center gap-3 mb-4 text-sm" style="color: var(--global-text-color-muted)">
-          <time>{formatDate(date)}</time>
-          {categories && categories.length > 0 && (
-            <>
-              <span>·</span>
-              <span style="color: var(--global-theme-color)">{categories[0]}</span>
-            </>
+  <ReadingProgress />
+
+  <div class="max-w-4xl mx-auto py-12 px-4 lg:px-6">
+    <div class="grid grid-cols-1 lg:grid-cols-[180px_1fr] gap-8 lg:gap-12">
+      <!-- TOC sidebar (desktop only) -->
+      <aside class="hidden lg:block">
+        {headings.length > 0 && <TOC headings={headings} />}
+      </aside>
+
+      <article>
+        <!-- Header -->
+        <header class="mb-10">
+          <div class="flex items-center gap-3 mb-4 text-sm" style="color: var(--global-text-color-muted)">
+            <time>{formatDate(date)}</time>
+            {categories && categories.length > 0 && (
+              <>
+                <span>·</span>
+                <span style="color: var(--global-theme-color)">{categories[0]}</span>
+              </>
+            )}
+          </div>
+          <h1 class="text-2xl md:text-3xl font-semibold leading-tight" style="color: var(--global-text-color)">
+            {title}
+          </h1>
+          {description && (
+            <p class="mt-4 text-base" style="color: var(--global-text-color-light)">
+              {description}
+            </p>
           )}
-        </div>
-        <h1 class="text-2xl md:text-3xl font-semibold leading-tight" style="color: var(--global-text-color)">
-          {title}
-        </h1>
-        {description && (
-          <p class="mt-4 text-base" style="color: var(--global-text-color-light)">
-            {description}
-          </p>
-        )}
-        {lastmodFormatted && (
-          <p class="mt-2 text-xs" style="color: var(--global-text-color-muted)">
-            更新于 <time datetime={lastmod!.toISOString()}>{lastmodFormatted}</time>
-          </p>
-        )}
-      </header>
+          {lastmodFormatted && (
+            <p class="mt-2 text-xs" style="color: var(--global-text-color-muted)">
+              更新于 <time datetime={lastmod!.toISOString()}>{lastmodFormatted}</time>
+            </p>
+          )}
+        </header>
 
-      <!-- Body -->
-      <div class="prose max-w-none" id="post-content">
-        <slot />
-      </div>
-
-      <!-- Tags -->
-      {tags.length > 0 && (
-        <div class="mt-10 pt-6 flex flex-wrap gap-2" style="border-top: 1px solid var(--global-divider-color)">
-          {tags.map(tag => (
-            <span
-              class="text-xs px-2 py-1 rounded"
-              style="background: var(--global-card-bg-color); color: var(--global-text-color-light)"
-            >
-              {tag}
-            </span>
-          ))}
+        <!-- Body -->
+        <div class="prose max-w-none" id="post-content">
+          <slot />
         </div>
-      )}
-    </article>
+
+        <!-- Tags -->
+        {tags.length > 0 && (
+          <div class="mt-10 pt-6 flex flex-wrap gap-2" style="border-top: 1px solid var(--global-divider-color)">
+            {tags.map(tag => (
+              <span
+                class="text-xs px-2 py-1 rounded"
+                style="background: var(--global-card-bg-color); color: var(--global-text-color-light)"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <!-- Related posts -->
+        {related.length > 0 && (
+          <div class="mt-12 pt-8" style="border-top: 1px solid var(--global-divider-color)">
+            <h2 class="text-sm font-semibold mb-4 tracking-wide uppercase" style="color: var(--global-text-color-light)">
+              相关文章
+            </h2>
+            <div class="space-y-4">
+              {related.map(r => (
+                <a
+                  href={`/blog/${r.id}/`}
+                  class="block group"
+                  style="text-decoration: none;"
+                >
+                  <h3 class="text-base font-medium transition-colors" style="color: var(--global-text-color)">
+                    <span class="group-hover:underline">{r.data.title}</span>
+                  </h3>
+                  {r.data.description && (
+                    <p class="text-sm mt-1 line-clamp-2" style="color: var(--global-text-color-light)">
+                      {r.data.description}
+                    </p>
+                  )}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Comments -->
+        <Giscus />
+      </article>
+    </div>
   </div>
 </Base>
 

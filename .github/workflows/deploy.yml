@@ -34,6 +34,9 @@ jobs:
           ASTRO_SITE: ${{ vars.ASTRO_SITE || 'https://yourusername.github.io' }}
           ASTRO_BASE: ${{ vars.ASTRO_BASE || '' }}
 
+      - name: Generate search index
+        run: npx pagefind --site dist
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist/

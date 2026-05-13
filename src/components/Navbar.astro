@@ -2,6 +2,7 @@
 import type { NavDropdown, NavItem, NavLeaf } from '@config/site';
 import { site } from '@config/site';
 
+import SearchTrigger from './SearchTrigger.astro';
 import ThemeToggle from './ThemeToggle.astro';
 
 function isLeaf(item: NavItem): item is NavLeaf {
@@ -83,6 +84,8 @@ const items = site.navbar.items;
           }
         })
       }
+
+      <SearchTrigger />
 
       <ThemeToggle />
     </div>
