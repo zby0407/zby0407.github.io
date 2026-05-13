@@ -4,6 +4,7 @@ date: 2026-05-12
 description: 记录从选型到部署的完整过程，分享一些踩坑经验。
 tags: [Astro, 博客, 前端]
 categories: [技术]
+image: /assets/img/2.jpg
 ---
 
 最近用 Astro 搭建了这个博客，想记录一下整个过程。

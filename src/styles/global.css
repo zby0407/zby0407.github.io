@@ -17,7 +17,8 @@
   --global-code-bg-color: #f5f0e8;
   --global-hover-text-color: #ffffff;
 
-  --font-sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Noto Serif SC", "Songti SC", "STSong", serif;
   --font-mono: "Source Code Pro", ui-monospace, monospace;
 }
 

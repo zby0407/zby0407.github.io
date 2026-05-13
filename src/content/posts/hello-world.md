@@ -4,6 +4,7 @@ date: 2026-05-13
 description: 这是一篇示例文章，用来展示博客的基本样式。
 tags: [博客, Astro]
 categories: [随笔]
+image: /assets/img/1.jpg
 ---
 
 欢迎访问我的个人博客！

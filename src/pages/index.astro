@@ -6,7 +6,16 @@ import { getCollection } from 'astro:content';
 const posts = (await getCollection('posts'))
   .filter((p) => !p.data.hidden && !p.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 3);
+  .slice(0, 6);
+
+// Decorative images for masonry — not tied to posts
+const heroImages = [
+  { src: '/assets/img/1.jpg', alt: '' },
+  { src: '/assets/img/5.jpg', alt: '' },
+  { src: '/assets/img/3.jpg', alt: '' },
+  { src: '/assets/img/7.jpg', alt: '' },
+  { src: '/assets/img/9.jpg', alt: '' },
+];
 
 const formatDate = (d: Date) =>
   d.toLocaleDateString('zh-CN', {
@@ -17,50 +26,176 @@ const formatDate = (d: Date) =>
 ---
 
 <Base>
-  <div class="page-container">
-    <!-- Hero -->
-    <section class="py-20 md:py-28 text-center">
-      <h1 class="text-3xl md:text-4xl font-light tracking-widest mb-4" style="color: var(--global-text-color)">
-        {site.title}
-      </h1>
-      <p class="text-sm tracking-wider" style="color: var(--global-text-color-muted)">
-        {site.description}
-      </p>
-    </section>
-
-    <!-- Latest posts -->
-    <section class="py-12" style="border-top: 1px solid var(--global-divider-color)">
-      <div class="space-y-8">
-        {
-          posts.map((post) => (
-            <a href={`/blog/${post.id}/`} class="block group">
-              <div class="flex items-baseline gap-4">
-                <time class="text-xs tabular-nums shrink-0" style="color: var(--global-text-color-muted)">
-                  {formatDate(post.data.date)}
-                </time>
-                <span class="text-base font-medium" style="color: var(--global-text-color)">
-                  {post.data.title}
-                </span>
-              </div>
-              {post.data.description && (
-                <p class="mt-1 text-sm ml-20" style="color: var(--global-text-color-light)">
-                  {post.data.description}
-                </p>
-              )}
-            </a>
-          ))
-        }
+  <div class="relative">
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col items-center justify-center px-6 relative">
+      <!-- Logo mark -->
+      <div class="text-center mb-12">
+        <div
+          class="text-5xl md:text-7xl font-light mb-3 tracking-wide"
+          style="color: var(--global-text-color); font-family: 'Noto Serif SC', serif;"
+        >
+          赫萝的羊皮纸
+        </div>
+        <div class="text-xs tracking-[0.4em] uppercase" style="color: var(--global-text-color-muted);">
+          Horo's Parchment
+        </div>
       </div>
 
-      <div class="mt-10">
-        <a
-          href="/blog/"
-          class="text-sm inline-flex items-center gap-1 transition-colors"
-          style="color: var(--global-text-color-muted)"
-        >
-          查看更多 <span>→</span>
-        </a>
+      <!-- Photo masonry grid -->
+      <div class="w-full max-w-5xl mx-auto">
+        <div class="masonry-grid">
+          {
+            heroImages.map((img, i) => (
+              <div
+                class={`masonry-item masonry-item-${i + 1} group relative overflow-hidden rounded-sm`}
+              >
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading={i < 2 ? 'eager' : 'lazy'}
+                />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        <span class="text-xs tracking-widest" style="color: var(--global-text-color-muted);">SCROLL</span>
+        <div class="w-px h-8 animate-pulse" style="background: var(--global-text-color-muted);">
+        </div>
+      </div>
+    </section>
+
+    <!-- Latest posts section -->
+    <section class="py-24 px-6" style="border-top: 1px solid var(--global-divider-color);">
+      <div class="max-w-3xl mx-auto">
+        <div class="flex items-baseline justify-between mb-12">
+          <h2 class="text-sm tracking-[0.2em] uppercase font-medium" style="color: var(--global-text-color);">
+            Latest
+          </h2>
+          <a
+            href="/blog/"
+            class="text-xs tracking-wider transition-colors hover:opacity-70"
+            style="color: var(--global-theme-color); text-decoration: none;"
+          >
+            VIEW ALL →
+          </a>
+        </div>
+
+        <div class="space-y-0">
+          {
+            posts.map((post, i) => (
+              <a
+                href={`/blog/${post.id}/`}
+                class="group block py-8 transition-colors"
+                style={i !== posts.length - 1 ? 'border-bottom: 1px solid var(--global-divider-color);' : ''}
+              >
+                <div class="flex items-start gap-6 md:gap-10">
+                  <time
+                    class="text-xs tabular-nums shrink-0 mt-1 w-16"
+                    style="color: var(--global-text-color-muted);"
+                  >
+                    {formatDate(post.data.date)}
+                  </time>
+                  <div class="flex-1 min-w-0">
+                    <h3
+                      class="text-base md:text-lg font-medium mb-2 transition-colors group-hover:text-[var(--global-theme-color)]"
+                      style="color: var(--global-text-color);"
+                    >
+                      {post.data.title}
+                    </h3>
+                    {post.data.description && (
+                      <p class="text-sm line-clamp-2" style="color: var(--global-text-color-light);">
+                        {post.data.description}
+                      </p>
+                    )}
+                    {post.data.tags && post.data.tags.length > 0 && (
+                      <div class="flex gap-2 mt-3">
+                        {post.data.tags.slice(0, 3).map((tag) => (
+                          <span class="text-xs" style="color: var(--global-text-color-muted);">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {post.data.image && (
+                    <div class="hidden md:block shrink-0 w-24 h-16 overflow-hidden rounded-sm">
+                      <img
+                        src={post.data.image}
+                        alt=""
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
+                  )}
+                </div>
+              </a>
+            ))
+          }
+        </div>
       </div>
     </section>
   </div>
+
+  <style>
+    .masonry-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(12, 60px);
+      gap: 12px;
+    }
+
+    .masonry-item {
+      border-radius: 2px;
+    }
+
+    .masonry-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .masonry-item-1 {
+      grid-column: 1 / 5;
+      grid-row: 1 / 6;
+    }
+
+    .masonry-item-2 {
+      grid-column: 5 / 9;
+      grid-row: 2 / 8;
+    }
+
+    .masonry-item-3 {
+      grid-column: 9 / 13;
+      grid-row: 1 / 5;
+    }
+
+    .masonry-item-4 {
+      grid-column: 1 / 5;
+      grid-row: 6 / 12;
+    }
+
+    .masonry-item-5 {
+      grid-column: 9 / 13;
+      grid-row: 5 / 11;
+    }
+
+    @media (max-width: 768px) {
+      .masonry-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: auto;
+        gap: 8px;
+      }
+
+      .masonry-item {
+        grid-column: auto !important;
+        grid-row: auto !important;
+        aspect-ratio: 4/3;
+      }
+    }
+  </style>
 </Base>

@@ -15,10 +15,10 @@ export const site = {
   // ─── Identity ──────────────────────────────────────────────────────────────
 
   /** Site title. */
-  title: '你的名字',
+  title: "Horo's Parchment",
 
   /** Site description. */
-  description: '记录技术与生活',
+  description: '賢狼の羊皮紙',
 
   /** Full URL of deployed site. */
   url: (import.meta.env.SITE ?? 'https://example.github.io').replace(/\/$/, ''),
@@ -33,7 +33,7 @@ export const site = {
 
   author: {
     /** Full name. */
-    name: '你的名字',
+    name: 'ホロ',
 
     /** Email address. */
     email: 'your@email.com',
@@ -42,7 +42,7 @@ export const site = {
     avatar: '/assets/img/prof_pic.jpg',
 
     /** Subtitle below name on about page. */
-    subtitle: '开发者 / 摄影爱好者 / 生活记录者',
+    subtitle: '賢狼 / 旅人 / 麦わら帽子',
 
     /** Address block below profile photo. */
     moreInfo: '',
