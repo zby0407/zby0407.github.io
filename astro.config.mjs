@@ -1,6 +1,5 @@
 import mdx from '@astrojs/mdx';
 import partytown from '@astrojs/partytown';
-import react from '@astrojs/react';
 import icon from 'astro-icon';
 import { defineConfig } from 'astro/config';
 import rehypeExternalLinks from 'rehype-external-links';
@@ -76,7 +75,6 @@ export default defineConfig({
     ],
   },
   integrations: [
-    react(),
     mdx(),
     partytown({
       config: {

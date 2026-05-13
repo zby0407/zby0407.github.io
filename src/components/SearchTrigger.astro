@@ -112,7 +112,7 @@
     if (pagefindReady) return true;
     try {
       // @ts-ignore
-      pagefind = await import(/* @vite-ignore */ '/pagefind/pagefind.js');
+      pagefind = await eval("import('/pagefind/pagefind.js')");
       pagefindReady = true;
       return true;
     } catch {
