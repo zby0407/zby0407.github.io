@@ -56,7 +56,7 @@ function rehypeBasePaths() {
 
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.ASTRO_SITE ?? 'https://example.github.io', // override via ASTRO_SITE env var or edit directly
+  site: process.env.ASTRO_SITE ?? 'https://zby0407.github.io', // override via ASTRO_SITE env var or edit directly
   base: process.env.ASTRO_BASE ?? '', // override via ASTRO_BASE env var or set '/repo-name' for project pages
   output: 'static',
   trailingSlash: 'always',

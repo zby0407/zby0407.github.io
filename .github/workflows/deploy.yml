@@ -23,15 +23,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: 'yarn'
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --immutable
 
       - name: Build site
-        run: npm run build
+        run: yarn build
         env:
-          ASTRO_SITE: ${{ vars.ASTRO_SITE || 'https://yourusername.github.io' }}
+          ASTRO_SITE: ${{ vars.ASTRO_SITE || 'https://zby0407.github.io' }}
           ASTRO_BASE: ${{ vars.ASTRO_BASE || '' }}
 
       - name: Generate search index
