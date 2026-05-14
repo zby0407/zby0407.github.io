@@ -39,7 +39,7 @@ export const site = {
     email: 'your@email.com',
 
     /** Path to profile photo. */
-    avatar: '/assets/img/prof_pic.jpg',
+    avatar: '/assets/img/horo-avatar.png',
 
     /** Subtitle below name on about page. */
     subtitle: '賢狼 / 旅人 / 麦わら帽子',
