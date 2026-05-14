@@ -28,13 +28,7 @@ jobs:
         run: yarn install --immutable
 
       - name: Type-check
-        run: yarn test:types
-
-      - name: Lint
-        run: yarn lint:ci
-
-      - name: Unit tests
-        run: yarn test
+        run: yarn check
 
       - name: Build
         run: yarn build
