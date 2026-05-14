@@ -8,14 +8,14 @@ const posts = (await getCollection('posts'))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 6);
 
-// Decorative images for masonry — not tied to posts.
-// Replace these with your own anime/Holo images by placing them in public/assets/anime/
-const heroImages = [
-  { src: 'https://picsum.photos/seed/holo1/600/800', alt: '' },
-  { src: 'https://picsum.photos/seed/holo2/600/900', alt: '' },
-  { src: 'https://picsum.photos/seed/holo3/500/700', alt: '' },
-  { src: 'https://picsum.photos/seed/holo4/600/800', alt: '' },
-  { src: 'https://picsum.photos/seed/holo5/500/700', alt: '' },
+// Anime images for the gallery lightbox.
+// Replace these with your own images placed in public/assets/anime/
+const galleryImages = [
+  { src: 'https://picsum.photos/seed/anime1/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime1/400/500' },
+  { src: 'https://picsum.photos/seed/anime2/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime2/400/500' },
+  { src: 'https://picsum.photos/seed/anime3/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime3/400/500' },
+  { src: 'https://picsum.photos/seed/anime4/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime4/400/500' },
+  { src: 'https://picsum.photos/seed/anime5/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime5/400/500' },
 ];
 
 const formatDate = (d: Date) =>
@@ -43,21 +43,26 @@ const formatDate = (d: Date) =>
         </div>
       </div>
 
-      <!-- Photo masonry grid -->
-      <div class="w-full max-w-5xl mx-auto">
-        <div class="masonry-grid">
+      <!-- Anime gallery grid -->
+      <div class="w-full max-w-4xl mx-auto">
+        <div class="gallery-grid">
           {
-            heroImages.map((img, i) => (
-              <div
-                class={`masonry-item masonry-item-${i + 1} group relative overflow-hidden rounded-sm`}
+            galleryImages.map((img, i) => (
+              <button
+                class="gallery-thumb group relative overflow-hidden rounded-sm"
+                data-index={i}
+                aria-label={`查看图片 ${i + 1}`}
               >
                 <img
-                  src={img.src}
+                  src={img.thumb}
                   alt={img.alt}
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading={i < 2 ? 'eager' : 'lazy'}
                 />
-              </div>
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background: rgba(0,0,0,0.2);">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                </div>
+              </button>
             ))
           }
         </div>
@@ -70,6 +75,30 @@ const formatDate = (d: Date) =>
         </div>
       </div>
     </section>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="fixed inset-0 z-[100] hidden" style="background: rgba(0,0,0,0.92);">
+      <!-- Close button -->
+      <button id="lightbox-close" class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full" style="background: rgba(255,255,255,0.1); color: #fff;" aria-label="关闭">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <!-- Counter -->
+      <div id="lightbox-counter" class="absolute top-4 left-1/2 -translate-x-1/2 text-sm" style="color: rgba(255,255,255,0.7);"></div>
+
+      <!-- Main image -->
+      <div class="absolute inset-0 flex items-center justify-center px-16 py-12">
+        <img id="lightbox-img" src="" alt="" class="max-w-full max-h-full object-contain transition-opacity duration-300" />
+      </div>
+
+      <!-- Prev/Next arrows -->
+      <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full" style="background: rgba(255,255,255,0.1); color: #fff;" aria-label="上一张">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full" style="background: rgba(255,255,255,0.1); color: #fff;" aria-label="下一张">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
 
     <!-- Latest posts section -->
     <section class="py-24 px-6" style="border-top: 1px solid var(--global-divider-color);">
@@ -142,60 +171,138 @@ const formatDate = (d: Date) =>
     </section>
   </div>
 
+  <script is:inline data-astro-rerun>
+    (function() {
+      // --- Gallery Lightbox ---
+      const images = [
+        { src: 'https://picsum.photos/seed/anime1/800/1000' },
+        { src: 'https://picsum.photos/seed/anime2/800/1000' },
+        { src: 'https://picsum.photos/seed/anime3/800/1000' },
+        { src: 'https://picsum.photos/seed/anime4/800/1000' },
+        { src: 'https://picsum.photos/seed/anime5/800/1000' },
+      ];
+
+      const thumbs = document.querySelectorAll('.gallery-thumb');
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+      const lightboxCounter = document.getElementById('lightbox-counter');
+      const closeBtn = document.getElementById('lightbox-close');
+      const prevBtn = document.getElementById('lightbox-prev');
+      const nextBtn = document.getElementById('lightbox-next');
+
+      let current = 0;
+
+      function open(index) {
+        current = index;
+        updateImage();
+        lightbox.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function close() {
+        lightbox.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      function updateImage() {
+        lightboxImg.style.opacity = '0';
+        setTimeout(() => {
+          lightboxImg.src = images[current].src;
+          lightboxImg.onload = () => { lightboxImg.style.opacity = '1'; };
+          lightboxCounter.textContent = (current + 1) + ' / ' + images.length;
+        }, 150);
+      }
+
+      function next() {
+        current = (current + 1) % images.length;
+        updateImage();
+      }
+
+      function prev() {
+        current = (current - 1 + images.length) % images.length;
+        updateImage();
+      }
+
+      thumbs.forEach((thumb, i) => {
+        thumb.addEventListener('click', () => open(i));
+      });
+
+      closeBtn?.addEventListener('click', close);
+      nextBtn?.addEventListener('click', next);
+      prevBtn?.addEventListener('click', prev);
+
+      lightbox?.addEventListener('click', (e) => {
+        if (e.target === lightbox) close();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (lightbox?.classList.contains('hidden')) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowRight') next();
+        if (e.key === 'ArrowLeft') prev();
+      });
+    })();
+  </script>
+
   <style>
-    .masonry-grid {
+    .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      grid-template-rows: repeat(12, 60px);
-      gap: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
 
-    .masonry-item {
-      border-radius: 2px;
+    .gallery-grid .gallery-thumb:nth-child(1) {
+      grid-column: 1 / 2;
+      grid-row: 1 / 3;
+      aspect-ratio: 3/4;
     }
 
-    .masonry-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .gallery-grid .gallery-thumb:nth-child(2) {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      aspect-ratio: 4/3;
     }
 
-    .masonry-item-1 {
-      grid-column: 1 / 5;
-      grid-row: 1 / 6;
+    .gallery-grid .gallery-thumb:nth-child(3) {
+      grid-column: 3 / 4;
+      grid-row: 1 / 2;
+      aspect-ratio: 4/3;
     }
 
-    .masonry-item-2 {
-      grid-column: 5 / 9;
-      grid-row: 2 / 8;
+    .gallery-grid .gallery-thumb:nth-child(4) {
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+      aspect-ratio: 4/3;
     }
 
-    .masonry-item-3 {
-      grid-column: 9 / 13;
-      grid-row: 1 / 5;
+    .gallery-grid .gallery-thumb:nth-child(5) {
+      grid-column: 3 / 4;
+      grid-row: 2 / 3;
+      aspect-ratio: 4/3;
     }
 
-    .masonry-item-4 {
-      grid-column: 1 / 5;
-      grid-row: 6 / 12;
-    }
-
-    .masonry-item-5 {
-      grid-column: 9 / 13;
-      grid-row: 5 / 11;
+    .gallery-thumb {
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      background: none;
     }
 
     @media (max-width: 768px) {
-      .masonry-grid {
+      .gallery-grid {
         grid-template-columns: repeat(2, 1fr);
         grid-template-rows: auto;
-        gap: 8px;
       }
 
-      .masonry-item {
+      .gallery-grid .gallery-thumb {
         grid-column: auto !important;
         grid-row: auto !important;
         aspect-ratio: 4/3;
+      }
+
+      .gallery-grid .gallery-thumb:nth-child(1) {
+        grid-column: 1 / 3 !important;
+        aspect-ratio: 16/9;
       }
     }
   </style>
