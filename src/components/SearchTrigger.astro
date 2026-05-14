@@ -97,104 +97,99 @@
   </div>
 </div>
 
-<script data-astro-rerun>
-  const trigger = document.getElementById('search-trigger');
-  const overlay = document.getElementById('search-overlay');
-  const backdrop = document.getElementById('search-backdrop');
-  const input = document.getElementById('search-input') as HTMLInputElement | null;
-  const resultsEl = document.getElementById('search-results');
-  const statusEl = document.getElementById('search-status');
+<script is:inline data-astro-rerun>
+  (function() {
+    const trigger = document.getElementById('search-trigger');
+    const overlay = document.getElementById('search-overlay');
+    const backdrop = document.getElementById('search-backdrop');
+    const input = document.getElementById('search-input');
+    const resultsEl = document.getElementById('search-results');
+    const statusEl = document.getElementById('search-status');
 
-  let pagefind: any = null;
-  let pagefindReady = false;
+    let pagefind = null;
+    let pagefindReady = false;
 
-  async function initPagefind() {
-    if (pagefindReady) return true;
-    try {
-      // @ts-ignore
-      pagefind = await eval("import('/pagefind/pagefind.js')");
-      pagefindReady = true;
-      return true;
-    } catch {
-      return false;
+    async function initPagefind() {
+      if (pagefindReady) return true;
+      try {
+        pagefind = await import('/pagefind/pagefind.js');
+        pagefindReady = true;
+        return true;
+      } catch {
+        return false;
+      }
     }
-  }
 
-  function openModal() {
-    overlay?.classList.remove('hidden');
-    input?.focus();
-    initPagefind().then((ok) => {
-      if (!ok && statusEl) {
-        statusEl.textContent = '搜索索引仅在构建后可用';
+    function openModal() {
+      if (overlay) overlay.classList.remove('hidden');
+      if (input) input.focus();
+      initPagefind().then(function(ok) {
+        if (!ok && statusEl) {
+          statusEl.textContent = '搜索索引仅在构建后可用';
+        }
+      });
+    }
+
+    function closeModal() {
+      if (overlay) overlay.classList.add('hidden');
+      if (input) input.value = '';
+      if (resultsEl) resultsEl.innerHTML = '';
+      if (statusEl) statusEl.textContent = '';
+    }
+
+    if (trigger) trigger.addEventListener('click', openModal);
+    if (backdrop) backdrop.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openModal();
+      }
+      if (e.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) {
+        closeModal();
       }
     });
-  }
 
-  function closeModal() {
-    overlay?.classList.add('hidden');
-    if (input) input.value = '';
-    if (resultsEl) resultsEl.innerHTML = '';
-    if (statusEl) statusEl.textContent = '';
-  }
+    document.addEventListener('astro:after-swap', closeModal);
 
-  trigger?.addEventListener('click', openModal);
-  backdrop?.addEventListener('click', closeModal);
+    if (input) {
+      input.addEventListener('input', async function(e) {
+        const query = e.target.value.trim();
+        if (!resultsEl || !statusEl) return;
 
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      openModal();
+        if (!query) {
+          resultsEl.innerHTML = '';
+          statusEl.textContent = '';
+          return;
+        }
+
+        const ok = await initPagefind();
+        if (!ok) {
+          resultsEl.innerHTML = '<p class="text-sm py-4 text-center" style="color: var(--global-text-color-muted);">搜索索引未生成，请先构建站点。</p>';
+          return;
+        }
+
+        const search = await pagefind.search(query);
+        statusEl.textContent = '找到 ' + search.results.length + ' 条结果';
+
+        if (search.results.length === 0) {
+          resultsEl.innerHTML = '<p class="text-sm py-4 text-center" style="color: var(--global-text-color-muted);">未找到相关文章</p>';
+          return;
+        }
+
+        const items = await Promise.all(search.results.slice(0, 8).map(function(r) { return r.data(); }));
+
+        resultsEl.innerHTML = items
+          .map(function(item) {
+            return '<a href="' + item.url + '" class="block py-2 px-2 rounded transition-colors" style="text-decoration: none; color: inherit;" onmouseover="this.style.background=\'var(--global-bg-color)\'" onmouseout="this.style.background=\'transparent\'">' +
+              '<div class="text-sm font-medium" style="color: var(--global-theme-color);">' + (item.meta.title || '无标题') + '</div>' +
+              '<div class="text-xs mt-0.5 line-clamp-2" style="color: var(--global-text-color-light);">' + (item.excerpt || '') + '</div>' +
+            '</a>';
+          })
+          .join('');
+      });
     }
-    if (e.key === 'Escape' && !overlay?.classList.contains('hidden')) {
-      closeModal();
-    }
-  });
-
-  document.addEventListener('astro:after-swap', closeModal);
-
-  input?.addEventListener('input', async (e) => {
-    const query = (e.target as HTMLInputElement).value.trim();
-    if (!resultsEl || !statusEl) return;
-
-    if (!query) {
-      resultsEl.innerHTML = '';
-      statusEl.textContent = '';
-      return;
-    }
-
-    const ok = await initPagefind();
-    if (!ok) {
-      resultsEl.innerHTML = '<p class="text-sm py-4 text-center" style="color: var(--global-text-color-muted);">搜索索引未生成，请先构建站点。</p>';
-      return;
-    }
-
-    const search = await pagefind.search(query);
-    statusEl.textContent = `找到 ${search.results.length} 条结果`;
-
-    if (search.results.length === 0) {
-      resultsEl.innerHTML = '<p class="text-sm py-4 text-center" style="color: var(--global-text-color-muted);">未找到相关文章</p>';
-      return;
-    }
-
-    const items = await Promise.all(search.results.slice(0, 8).map((r: any) => r.data()));
-
-    resultsEl.innerHTML = items
-      .map(
-        (item: any) => `
-          <a
-            href="${item.url}"
-            class="block py-2 px-2 rounded transition-colors"
-            style="text-decoration: none; color: inherit;"
-            onmouseover="this.style.background='var(--global-bg-color)'"
-            onmouseout="this.style.background='transparent'"
-          >
-            <div class="text-sm font-medium" style="color: var(--global-theme-color);">${item.meta.title || '无标题'}</div>
-            <div class="text-xs mt-0.5 line-clamp-2" style="color: var(--global-text-color-light);">${item.excerpt || ''}</div>
-          </a>
-        `
-      )
-      .join('');
-  });
+  })();
 </script>
 
 <style>
