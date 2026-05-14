@@ -36,7 +36,7 @@ export const site = {
     name: 'ホロ',
 
     /** Email address. */
-    email: 'your@email.com',
+    email: 'fen0407@126.com',
 
     /** Path to profile photo. */
     avatar: '/assets/img/horo-avatar.png',
@@ -51,10 +51,10 @@ export const site = {
   // ─── Social links ──────────────────────────────────────────────────────────
 
   socials: {
-    email: 'your@email.com',
+    email: 'fen0407@126.com',
     x_username: undefined as string | undefined,
     linkedin_username: undefined as string | undefined,
-    github_username: 'yourusername',
+    github_username: 'zby0407',
     gitlab_username: undefined as string | undefined,
     scholar_userid: undefined as string | undefined,
     orcid_id: undefined as string | undefined,
