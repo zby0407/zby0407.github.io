@@ -1446,3 +1446,55 @@ html.dark :not(.datatable-ascending):not(.datatable-descending)>.datatable-sorte
 .glightbox-clean .gslide-description {
   background: var(--color-bgColor);
 }
+
+/* Markdown default table styles */
+article table,
+.mdx-notion table {
+  width: 100%;
+  font-size: 0.875rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-collapse: collapse;
+  border: 1px solid color-mix(in srgb, var(--color-textColor) 12%, transparent);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+article thead,
+.mdx-notion thead {
+  text-align: left;
+}
+
+article th,
+.mdx-notion th {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-textColor) 12%, transparent);
+}
+
+article td,
+.mdx-notion td {
+  padding: 0.75rem 1rem;
+  vertical-align: top;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-textColor) 8%, transparent);
+}
+
+article tbody tr:last-child td,
+.mdx-notion tbody tr:last-child td {
+  border-bottom: none;
+}
+
+article tbody tr:nth-child(even),
+.mdx-notion tbody tr:nth-child(even) {
+  background-color: color-mix(in srgb, var(--color-accent) 3%, transparent);
+}
+
+article tbody tr:hover,
+.mdx-notion tbody tr:hover {
+  background-color: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  transition: background-color 150ms ease;
+}
