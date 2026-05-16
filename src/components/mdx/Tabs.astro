@@ -1,0 +1,53 @@
+---
+interface Props {
+	labels: string;
+}
+
+const { labels } = Astro.props;
+const labelList = labels.split(",").map((l) => l.trim());
+---
+
+<div class="tabs my-4" data-tabs>
+	<div class="flex gap-0 border-b border-accent/10">
+		{
+			labelList.map((label, i) => (
+				<button
+					class="tab-btn px-4 py-2 text-sm font-medium transition border-b-2 border-transparent text-textColor/60 hover:text-textColor data-[active=true]:border-accent data-[active=true]:text-accent"
+					data-tab-index={i}
+					data-active={i === 0 ? "true" : "false"}
+					type="button"
+				>
+					{label}
+				</button>
+			))
+		}
+	</div>
+	<div class="tab-panels">
+		<slot />
+	</div>
+</div>
+
+<script>
+	document.querySelectorAll("[data-tabs]").forEach((tabs) => {
+		const buttons = tabs.querySelectorAll("[data-tab-index]");
+		const panels = tabs.querySelectorAll(".tab-panel");
+
+		buttons.forEach((btn) => {
+			btn.addEventListener("click", () => {
+				const index = btn.getAttribute("data-tab-index");
+
+				buttons.forEach((b) => b.setAttribute("data-active", "false"));
+				btn.setAttribute("data-active", "true");
+
+				panels.forEach((p, i) => {
+					(p as HTMLElement).style.display = i.toString() === index ? "block" : "none";
+				});
+			});
+		});
+
+		// Initialize: show first panel, hide others
+		panels.forEach((p, i) => {
+			(p as HTMLElement).style.display = i === 0 ? "block" : "none";
+		});
+	});
+</script>

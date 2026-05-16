@@ -1,51 +1,45 @@
 ---
-import Page from '@layouts/Page.astro';
-import { getCollection } from 'astro:content';
+import PageLayout from "@/layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { getNavLink } from "@/lib/blog-helpers";
 
-const projects = (await getCollection('projects')).sort(
-  (a, b) => (a.data.importance ?? 999) - (b.data.importance ?? 999),
-);
+const projects = (await getCollection("projects"))
+  .sort((a, b) => (a.data.importance || 999) - (b.data.importance || 999));
+
+const parseMdLink = (text: string) =>
+  text.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer" class="site-page-link">$1</a>'
+  );
 ---
 
-<Page title="项目">
-  <h1 class="text-2xl font-semibold mb-10" style="color: var(--global-text-color)">
-    精选项目
-  </h1>
-
-  <div class="space-y-4">
-    {
-      projects.map((project) => (
-        <div
-          class="p-5 rounded-lg"
-          style="background: var(--global-card-bg-color); border: 1px solid var(--global-divider-color)"
-        >
-          <div class="flex gap-4">
-            {project.data.img && (
-              <div class="shrink-0">
-                <img
-                  src={project.data.img}
-                  alt={project.data.title}
-                  class="w-14 h-14 rounded-md object-cover"
-                />
-              </div>
+<PageLayout
+  meta={{
+    title: "项目",
+    description: "我的项目作品",
+  }}
+>
+  <div class="max-w-[708px] sm:mr-20">
+    <h1 class="title mb-8">项目</h1>
+    <ul class="space-y-6">
+      {
+        projects.map((project) => (
+          <li class="flex max-w-full flex-col flex-wrap gap-1.5">
+            <a
+              href={project.data.url || getNavLink(`/projects/${project.id}/`)}
+              class="site-page-link text-lg font-semibold"
+            >
+              {project.data.title}
+            </a>
+            {project.data.description && (
+              <p class="text-sm text-textColor/70" set:html={parseMdLink(project.data.description)} />
             )}
-            <div class="flex-1 min-w-0">
-              <h3 class="text-base font-medium mb-1" style="color: var(--global-text-color)">
-                {project.data.url ? (
-                  <a href={project.data.url} target="_blank" rel="noopener" class="hover:underline">
-                    {project.data.title}
-                  </a>
-                ) : (
-                  project.data.title
-                )}
-              </h3>
-              <p class="text-sm mb-3" style="color: var(--global-text-color-light)">
-                {project.data.description}
-              </p>
-            </div>
-          </div>
-        </div>
-      ))
-    }
+            {project.data.category && (
+              <span class="text-xs text-textColor/50">{project.data.category}</span>
+            )}
+          </li>
+        ))
+      }
+    </ul>
   </div>
-</Page>
+</PageLayout>

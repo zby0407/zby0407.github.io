@@ -1,79 +1,108 @@
 ---
-import { site } from '@config/site';
-import Page from '@layouts/Page.astro';
-import { getCollection } from 'astro:content';
+import PageLayout from "@/layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { getNavLink } from "@/lib/blog-helpers";
+import Icon from "@/components/ui/Icon.astro";
+import TagPill from "@/components/blog/TagPill.astro";
 
-const posts = (await getCollection('posts'))
+const posts = (await getCollection("posts"))
   .filter((p) => !p.data.hidden && !p.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
+const tagCounts = new Map<string, number>();
+posts.forEach((post) => {
+  post.data.tags.forEach((tag) => {
+    tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  });
+});
+
+const allTags = Array.from(tagCounts.entries())
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count);
+
 const formatDate = (d: Date) =>
-  d.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).replace(/\//g, '.');
+  d.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).replace(/\//g, ".");
 ---
 
-<Page title={site.blog.name} description={site.blog.description}>
-  <h1 class="text-2xl font-semibold mb-12" style="color: var(--global-text-color)">
-    {site.blog.name}
-  </h1>
-
-  <div class="space-y-0">
-    {
-      posts.map((post) => (
-        <article class="py-6" style="border-bottom: 1px solid var(--global-divider-color)">
-          <div class="flex items-start gap-6">
-            <div class="flex-1 min-w-0">
-              <div class="flex items-baseline gap-3 mb-2">
-                <time class="text-xs tabular-nums shrink-0" style="color: var(--global-text-color-muted)">
-                  {formatDate(post.data.date)}
-                </time>
-                {post.data.categories && post.data.categories.length > 0 && (
-                  <a href={`/categories/${post.data.categories[0]}/`} class="text-xs" style="color: var(--global-theme-color); text-decoration: none;">
-                    {post.data.categories[0]}
-                  </a>
-                )}
+<PageLayout
+  meta={{
+    title: "文章",
+    description: "记录技术与生活的点滴",
+  }}
+>
+  <h1 class="title mb-8">文章</h1>
+  <div class="grid grid-cols-1 gap-y-12 sm:grid-cols-4 sm:items-start sm:gap-x-8">
+    <section aria-label="文章列表" class="col-span-1 sm:col-span-3 print:col-span-full">
+      <ul class="space-y-6">
+        {
+          posts.map((post) => (
+            <li class="flex max-w-full flex-col flex-wrap gap-1.5">
+              <div class="flex items-baseline gap-2">
+                <time class="text-sm text-textColor/60">{formatDate(post.data.date)}</time>
               </div>
-              <a href={`/blog/${post.id}/`} class="block group" style="text-decoration: none;">
-                <h2 class="text-lg font-medium mb-2 transition-colors group-hover:text-[var(--global-theme-color)]" style="color: var(--global-text-color)">
-                  {post.data.title}
-                </h2>
-                {post.data.description && (
-                  <p class="text-sm" style="color: var(--global-text-color-light)">
-                    {post.data.description}
-                  </p>
-                )}
+              <a
+                href={getNavLink(`/blog/${post.id}/`)}
+                class="site-page-link text-lg font-semibold"
+                data-astro-prefetch
+              >
+                {post.data.title}
               </a>
+              {post.data.description && (
+                <p class="text-sm text-textColor/70">{post.data.description}</p>
+              )}
               {post.data.tags && post.data.tags.length > 0 && (
-                <div class="flex gap-2 mt-2">
-                  {post.data.tags.slice(0, 3).map((tag) => (
-                    <a href={`/tags/${tag}/`} class="text-xs" style="color: var(--global-text-color-muted); text-decoration: none;">
-                      {tag}
-                    </a>
+                <div class="mt-1 flex flex-wrap gap-2">
+                  {post.data.tags.map((tag) => (
+                    <TagPill tag={tag} />
                   ))}
                 </div>
               )}
-            </div>
-            {post.data.image && (
-              <a href={`/blog/${post.id}/`} class="hidden md:block shrink-0 w-24 h-16 overflow-hidden rounded-sm">
-                <img
-                  src={post.data.image}
-                  alt=""
-                  class="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-              </a>
-            )}
-          </div>
-        </article>
-      ))
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    {
+      allTags.length > 0 && (
+        <aside class="col-span-1 print:hidden">
+          <h2 class="mb-4 flex items-center text-lg font-semibold text-accent-2">
+            <Icon
+              class="h-6 w-6"
+              name="tag-multiple"
+              aria-hidden="true"
+              focusable="false"
+            />
+            <span class="ml-1">标签</span>
+          </h2>
+          <ul class="flex flex-wrap gap-2">
+            {allTags.map((tag) => (
+              <li>
+                <TagPill tag={tag.name} count={tag.count} />
+              </li>
+            ))}
+          </ul>
+          <span class="mt-4 block sm:text-end">
+            <a
+              class="inline-flex items-center gap-1 transition hover:text-accent"
+              href={getNavLink("/tags/")}
+              aria-label="查看所有标签"
+            >
+              查看全部
+              <Icon
+                class="h-4 w-4"
+                name="next"
+                aria-hidden="true"
+                focusable="false"
+              />
+            </a>
+          </span>
+        </aside>
+      )
     }
   </div>
-
-  {posts.length === 0 && (
-    <p style="color: var(--global-text-color-light); padding-top: 2rem;">
-      {site.blog.emptyMessage}
-    </p>
-  )}
-</Page>
+</PageLayout>

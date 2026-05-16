@@ -1,0 +1,133 @@
+---
+import Search from "@/components/ui/Search.astro";
+import { getMenu } from "@/utils";
+import { siteInfo } from "@/site.config";
+import { getNavLink, normalizeNavPath } from "@/lib/blog-helpers";
+import Icon from "@/components/ui/Icon.astro";
+import ThemeIcon from "@/components/ui/ThemeIcon.astro";
+
+const menuLinks = getMenu();
+
+const url = new URL(Astro.request.url);
+const currentPath = normalizeNavPath(url.pathname);
+
+const rss_path = getNavLink("/rss.xml");
+---
+
+<header id="main-header" class="site-header group">
+	<a
+		href={getNavLink("/")}
+		class="flex-shrink-0 grayscale hover:filter-none"
+		aria-current={currentPath === "/" ? "page" : false}
+	>
+		<img
+			src={getNavLink("/site-icon.jpg")}
+			alt="Site icon"
+			class="h-10 w-10 rounded-md object-cover sm:h-12 sm:w-12"
+			width="48"
+			height="48"
+		/>
+	</a>
+	<div class="flex flex-col items-start justify-start">
+		<a
+			href={getNavLink("/")}
+			class="text-xl font-bold leading-tight sm:text-2xl"
+			aria-current={currentPath === "/" ? "page" : false}
+		>
+			{siteInfo.title}
+		</a>
+		<nav id="navigation-menu" class="nav-menu" aria-label="Main menu">
+			{
+				menuLinks.map((link) => (
+					<a
+						href={link.path}
+						class="nav-link"
+						aria-current={currentPath === normalizeNavPath(link.path) ? "page" : false}
+						data-astro-prefetch
+					>
+						{link.title}
+					</a>
+				))
+			}
+		</nav>
+	</div>
+	<div class="ml-auto flex flex-row print:hidden">
+		<div
+			class="hover:text-accent h-10 w-10 cursor-pointer items-center justify-center rounded-md p-1.5"
+		>
+			<a href={rss_path}
+				><Icon name={"rss"} class="hover:text-accent h-7 w-7" aria-label="Open RSS Link" /></a
+			>
+		</div>
+		<Search />
+		<ThemeIcon />
+		<mobile-button class="flex items-center">
+			<button
+				id="toggle-navigation-menu"
+				class="group relative ms-4 h-7 w-7 cursor-pointer sm:invisible sm:hidden"
+				type="button"
+				aria-label="Open main menu"
+				aria-expanded="false"
+				aria-haspopup="menu"
+			>
+				<Icon
+					name={"menu"}
+					class="absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 transition-all group-aria-expanded:scale-0 group-aria-expanded:opacity-0"
+					aria-hidden="true"
+					focusable="false"
+				/>
+
+				<Icon
+					name={"close"}
+					class="text-accent absolute start-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 scale-0 opacity-0 transition-all group-aria-expanded:scale-100 group-aria-expanded:opacity-100"
+					aria-hidden="true"
+					focusable="false"
+				/>
+			</button>
+		</mobile-button>
+	</div>
+</header>
+
+<script>
+	class MobileNavBtn extends HTMLElement {
+		constructor() {
+			super();
+
+			const mobileButtonEl = document.getElementById("toggle-navigation-menu");
+			let menuOpen = false;
+
+			function toggleMobileMenu() {
+				const headerEl = document.getElementById("main-header")!;
+				headerEl.classList.toggle("menu-open");
+				menuOpen = !menuOpen;
+				mobileButtonEl.setAttribute("aria-expanded", menuOpen.toString());
+			}
+
+			mobileButtonEl.addEventListener("click", () => toggleMobileMenu());
+		}
+	}
+
+	customElements.define("mobile-button", MobileNavBtn);
+
+	document.addEventListener("DOMContentLoaded", function () {
+		var toggleButton = document.getElementById("toggle-navigation-menu");
+
+		document.addEventListener("click", function (event) {
+			var navMenu = document.getElementById("navigation-menu");
+			var mainHeader = document.getElementById("main-header");
+
+			// Check if the click is on the toggle button or a descendant of it
+			var isClickInsideToggleButton = toggleButton.contains(event.target);
+
+			if (!isClickInsideToggleButton && event.target instanceof Node) {
+				var isClickInsideNav = navMenu.contains(event.target);
+
+				if (!isClickInsideNav && mainHeader) {
+					// If the click is outside the navMenu and mainHeader exists, remove 'menu-open' attribute
+					mainHeader.classList.remove("menu-open");
+					toggleButton.setAttribute("aria-expanded", "false");
+				}
+			}
+		});
+	});
+</script>

@@ -1,0 +1,20 @@
+---
+interface Props {
+	id: string;
+}
+
+const { id } = Astro.props;
+const embedUrl = `https://platform.twitter.com/embed/Tweet.html?id=${id}`;
+---
+
+<div class="tweet-embed my-4 overflow-hidden rounded-lg border border-accent/10">
+	<iframe
+		class="w-full"
+		src={embedUrl}
+		style="height: 500px;"
+		frameborder="0"
+		scrolling="no"
+		loading="lazy"
+		title="Twitter embed"
+	></iframe>
+</div>

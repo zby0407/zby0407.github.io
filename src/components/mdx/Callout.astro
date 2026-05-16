@@ -1,0 +1,72 @@
+---
+interface Props {
+	type?: "info" | "warning" | "danger" | "tip" | "note" | "success";
+	title?: string;
+}
+
+const { type = "info", title } = Astro.props;
+
+const styles = {
+	info: {
+		bg: "bg-sky-50 dark:bg-sky-950/30",
+		border: "border-sky-200 dark:border-sky-800",
+		text: "text-sky-900 dark:text-sky-100",
+		icon: "ℹ️",
+		iconColor: "text-sky-600 dark:text-sky-300",
+	},
+	warning: {
+		bg: "bg-amber-50 dark:bg-amber-950/30",
+		border: "border-amber-200 dark:border-amber-800",
+		text: "text-amber-900 dark:text-amber-100",
+		icon: "⚠️",
+		iconColor: "text-amber-600 dark:text-amber-300",
+	},
+	danger: {
+		bg: "bg-red-50 dark:bg-red-950/30",
+		border: "border-red-200 dark:border-red-800",
+		text: "text-red-900 dark:text-red-100",
+		icon: "🚫",
+		iconColor: "text-red-600 dark:text-red-300",
+	},
+	tip: {
+		bg: "bg-green-50 dark:bg-green-950/30",
+		border: "border-green-200 dark:border-green-800",
+		text: "text-green-900 dark:text-green-100",
+		icon: "💡",
+		iconColor: "text-green-600 dark:text-green-300",
+	},
+	note: {
+		bg: "bg-stone-50 dark:bg-stone-900/30",
+		border: "border-stone-200 dark:border-stone-700",
+		text: "text-stone-800 dark:text-stone-200",
+		icon: "📝",
+		iconColor: "text-stone-500 dark:text-stone-400",
+	},
+	success: {
+		bg: "bg-emerald-50 dark:bg-emerald-950/30",
+		border: "border-emerald-200 dark:border-emerald-800",
+		text: "text-emerald-900 dark:text-emerald-100",
+		icon: "✅",
+		iconColor: "text-emerald-600 dark:text-emerald-300",
+	},
+};
+
+const s = styles[type];
+---
+
+<div
+	class={`callout my-4 rounded-lg border px-4 py-3 ${s.bg} ${s.border} ${s.text}`}
+	data-callout-type={type}
+>
+	<div class="flex items-start gap-3">
+		<span class={`mt-0.5 text-base ${s.iconColor}`} aria-hidden="true">{s.icon}</span>
+		<div class="min-w-0 flex-1">
+			{title && (
+				<p class="mb-1 font-semibold">{title}</p>
+			)}
+			<div class="callout-content text-sm leading-relaxed">
+				<slot />
+			</div>
+		</div>
+	</div>
+</div>

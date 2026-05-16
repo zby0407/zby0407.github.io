@@ -1,71 +1,99 @@
 ---
-import Page from '@layouts/Page.astro';
-import { getCollection } from 'astro:content';
+import PageLayout from "@/layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { getNavLink } from "@/lib/blog-helpers";
+import type { GetStaticPaths } from "astro";
+import { slugify } from "@/utils/slugify";
+import Icon from "@/components/ui/Icon.astro";
+import TagPill from "@/components/blog/TagPill.astro";
 
-export async function getStaticPaths() {
-  const posts = await getCollection('posts');
-  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
-  return tags.map((tag) => ({
-    params: { tag },
-    props: {
-      posts: posts
-        .filter((p) => p.data.tags.includes(tag) && !p.data.hidden && !p.data.draft)
-        .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
-    },
-  }));
-}
+export const getStaticPaths = (async () => {
+  const posts = (await getCollection("posts")).filter(
+    (p) => !p.data.hidden && !p.data.draft,
+  );
 
-const { tag } = Astro.params;
-const { posts } = Astro.props;
+  const tagSet = new Set<string>();
+  posts.forEach((post) => {
+    post.data.tags.forEach((tag) => tagSet.add(tag));
+  });
+
+  return Array.from(tagSet).map((tag) => {
+    const tagPosts = posts
+      .filter((post) => post.data.tags.includes(tag))
+      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+    return {
+      params: { tag: slugify(tag) },
+      props: { tag, posts: tagPosts },
+    };
+  });
+}) satisfies GetStaticPaths;
+
+const { tag, posts } = Astro.props;
 
 const formatDate = (d: Date) =>
-  d.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).replace(/\//g, '.');
+  d.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).replace(/\//g, ".");
+
+const meta = {
+  title: `标签：${tag}`,
+  description: `查看所有带有「${tag}」标签的文章`,
+};
 ---
 
-<Page title={`标签：${tag}`} description={`包含标签 "${tag}" 的所有文章`}>
-  <h1 class="text-2xl font-semibold mb-2" style="color: var(--global-text-color)">
-    #{tag}
-  </h1>
-  <p class="text-sm mb-10" style="color: var(--global-text-color-muted)">
-    共 {posts.length} 篇文章
-  </p>
+<PageLayout meta={meta}>
+  <div class="max-w-[708px] sm:mr-20">
+    <h1 class="title mb-6 flex max-w-full items-center">
+      <span
+        class="flex items-center gap-2 rounded-lg bg-accent/10 px-2 py-1"
+      >
+        <Icon
+          class="inline h-6 w-6"
+          name="tag-outline"
+          aria-hidden="true"
+          focusable="false"
+        />
+        {tag}
+        <span class="count-badge text-base">{posts.length}</span>
+      </span>
+    </h1>
 
-  <div class="space-y-0">
     {
-      posts.map((post) => (
-        <article class="py-6" style="border-bottom: 1px solid var(--global-divider-color)">
-          <a href={`/blog/${post.id}/`} class="block group">
-            <div class="flex items-baseline gap-4 mb-2">
-              <time class="text-xs tabular-nums shrink-0" style="color: var(--global-text-color-muted)">
-                {formatDate(post.data.date)}
-              </time>
-              {post.data.categories && post.data.categories.length > 0 && (
-                <span class="text-xs" style="color: var(--global-theme-color)">
-                  {post.data.categories[0]}
-                </span>
+      posts.length > 0 ? (
+        <ul class="space-y-6">
+          {posts.map((post) => (
+            <li class="flex max-w-full flex-col flex-wrap gap-1.5">
+              <div class="flex items-baseline gap-2">
+                <time class="text-sm text-textColor/60">
+                  {formatDate(post.data.date)}
+                </time>
+              </div>
+              <a
+                href={getNavLink(`/blog/${post.id}/`)}
+                class="site-page-link text-lg font-semibold"
+                data-astro-prefetch
+              >
+                {post.data.title}
+              </a>
+              {post.data.description && (
+                <p class="text-sm text-textColor/70">{post.data.description}</p>
               )}
-            </div>
-            <h2 class="text-lg font-medium mb-2" style="color: var(--global-text-color)">
-              {post.data.title}
-            </h2>
-            {post.data.description && (
-              <p class="text-sm" style="color: var(--global-text-color-light)">
-                {post.data.description}
-              </p>
-            )}
-          </a>
-        </article>
-      ))
+              {post.data.tags && post.data.tags.length > 0 && (
+                <div class="mt-1 flex flex-wrap gap-2">
+                  {post.data.tags.map((t) => (
+                    <TagPill tag={t} />
+                  ))}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="text-textColor/60">该标签下暂无文章</p>
+      )
     }
   </div>
-
-  {posts.length === 0 && (
-    <p style="color: var(--global-text-color-light); padding-top: 2rem;">
-      没有找到相关文章。
-    </p>
-  )}
-</Page>
+</PageLayout>

@@ -1,0 +1,29 @@
+---
+interface Props {
+  url: string;
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const { url, title, description, image } = Astro.props;
+---
+
+<a
+  href={url}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="link-preview my-4 flex overflow-hidden rounded-lg border border-accent/10 bg-accent/5 transition hover:border-accent/30 hover:bg-accent/10"
+  data-astro-prefetch
+>
+  <div class="flex flex-1 flex-col justify-center p-4">
+    {title && <p class="mb-1 font-semibold text-textColor">{title}</p>}
+    {description && <p class="text-sm text-textColor/70 line-clamp-2">{description}</p>}
+    <p class="mt-2 text-xs text-textColor/50 truncate">{url}</p>
+  </div>
+  {image && (
+    <div class="hidden w-32 shrink-0 sm:block">
+      <img src={image} alt="" class="h-full w-full object-cover" loading="lazy" />
+    </div>
+  )}
+</a>

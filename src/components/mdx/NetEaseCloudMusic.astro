@@ -1,0 +1,39 @@
+---
+interface Props {
+	id: string;
+	type?: "song" | "playlist" | "album";
+}
+
+const { id, type = "song" } = Astro.props;
+
+const typeMap = {
+	song: 2,
+	playlist: 0,
+	album: 1,
+};
+
+const height = type === "playlist" ? 320 : 66;
+const embedUrl = `https://music.163.com/outchain/player?type=${typeMap[type]}&id=${id}&auto=0&height=${height}`;
+---
+
+<div class="netease-music-embed my-4 overflow-hidden rounded-lg">
+	<iframe
+		class="w-full"
+		style={`height: ${height}px;`}
+		src={embedUrl}
+		frameborder="0"
+		allow="autoplay; encrypted-media"
+		loading="lazy"
+		scrolling="no"
+		title="NetEase Cloud Music embed"
+	></iframe>
+</div>
+
+<style>
+	.netease-music-embed {
+		background-color: #f2f3f5;
+	}
+	.dark .netease-music-embed {
+		box-shadow: 0 0 0 1px color-mix(in srgb, var(--theme-text) 12%, transparent);
+	}
+</style>

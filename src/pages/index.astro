@@ -1,332 +1,68 @@
 ---
-import { site } from '@config/site';
-import Base from '@layouts/Base.astro';
-import { getCollection } from 'astro:content';
+import PageLayout from "@/layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { getNavLink } from "@/lib/blog-helpers";
+import Icon from "@/components/ui/Icon.astro";
 
-const posts = (await getCollection('posts'))
-  .filter((p) => !p.data.hidden && !p.data.draft)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 6);
-
-// Anime images for the gallery lightbox.
-// Replace these with your own images placed in public/assets/anime/
-const galleryImages = [
-  { src: 'https://picsum.photos/seed/anime1/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime1/400/500' },
-  { src: 'https://picsum.photos/seed/anime2/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime2/400/500' },
-  { src: 'https://picsum.photos/seed/anime3/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime3/400/500' },
-  { src: 'https://picsum.photos/seed/anime4/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime4/400/500' },
-  { src: 'https://picsum.photos/seed/anime5/800/1000', alt: '', thumb: 'https://picsum.photos/seed/anime5/400/500' },
-];
+const posts = (await getCollection("posts"))
+	.filter((p) => !p.data.hidden && !p.data.draft)
+	.sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+	.slice(0, 5);
 
 const formatDate = (d: Date) =>
-  d.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).replace(/\//g, '.');
+	d.toLocaleDateString("zh-CN", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	}).replace(/\//g, ".");
 ---
 
-<Base>
-  <div class="relative">
-    <!-- Hero Section -->
-    <section class="min-h-screen flex flex-col items-center justify-center px-6 relative">
-      <!-- Logo mark -->
-      <div class="text-center mb-12">
-        <div
-          class="text-5xl md:text-7xl font-light mb-3 tracking-wide"
-          style="color: var(--global-text-color); font-family: 'Noto Serif SC', serif;"
-        >
-          赫萝的羊皮纸
-        </div>
-        <div class="text-xs tracking-[0.4em] uppercase" style="color: var(--global-text-color-muted);">
-          Horo's Parchment
-        </div>
-      </div>
+<PageLayout
+	meta={{
+		title: "Horo's Parchment",
+		description: "賢狼の羊皮紙",
+	}}
+>
+	<div class="max-w-[708px] sm:mr-20">
+		<section class="mb-12">
+			<h1 class="title mb-4">Horo's Parchment</h1>
+			<p class="text-textColor/80">賢狼の羊皮紙 — 记录技术与生活的点滴</p>
+		</section>
 
-      <!-- Anime gallery wall -->
-      <div class="w-full max-w-5xl mx-auto px-4">
-        <div class="gallery-wall">
-          {
-            galleryImages.map((img, i) => (
-              <button
-                class="gallery-thumb group overflow-hidden rounded-sm"
-                data-index={i}
-                aria-label={`查看图片 ${i + 1}`}
-              >
-                <img
-                  src={img.thumb}
-                  alt={img.alt}
-                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading={i < 2 ? 'eager' : 'lazy'}
-                />
-              </button>
-            ))
-          }
-        </div>
-      </div>
-
-      <!-- Scroll indicator -->
-      <div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span class="text-xs tracking-widest" style="color: var(--global-text-color-muted);">SCROLL</span>
-        <div class="w-px h-8 animate-pulse" style="background: var(--global-text-color-muted);">
-        </div>
-      </div>
-    </section>
-
-    <!-- Lightbox -->
-    <div id="lightbox" class="fixed inset-0 z-[100] hidden" style="background: rgba(0,0,0,0.92);">
-      <!-- Close button -->
-      <button id="lightbox-close" class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full" style="background: rgba(255,255,255,0.1); color: #fff;" aria-label="关闭">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-
-      <!-- Counter -->
-      <div id="lightbox-counter" class="absolute top-4 left-1/2 -translate-x-1/2 text-sm" style="color: rgba(255,255,255,0.7);"></div>
-
-      <!-- Main image -->
-      <div class="absolute inset-0 flex items-center justify-center px-16 py-12">
-        <img id="lightbox-img" src="" alt="" class="max-w-full max-h-full object-contain transition-opacity duration-300" />
-      </div>
-
-      <!-- Prev/Next arrows -->
-      <button id="lightbox-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full" style="background: rgba(255,255,255,0.1); color: #fff;" aria-label="上一张">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      </button>
-      <button id="lightbox-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full" style="background: rgba(255,255,255,0.1); color: #fff;" aria-label="下一张">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-      </button>
-    </div>
-
-    <!-- Latest posts section -->
-    <section class="py-24 px-6" style="border-top: 1px solid var(--global-divider-color);">
-      <div class="max-w-3xl mx-auto">
-        <div class="flex items-baseline justify-between mb-12">
-          <h2 class="text-sm tracking-[0.2em] uppercase font-medium" style="color: var(--global-text-color);">
-            Latest
-          </h2>
-          <a
-            href="/blog/"
-            class="text-xs tracking-wider transition-colors hover:opacity-70"
-            style="color: var(--global-theme-color); text-decoration: none;"
-          >
-            VIEW ALL →
-          </a>
-        </div>
-
-        <div class="space-y-0">
-          {
-            posts.map((post, i) => (
-              <a
-                href={`/blog/${post.id}/`}
-                class="group block py-8 transition-colors"
-                style={i !== posts.length - 1 ? 'border-bottom: 1px solid var(--global-divider-color);' : ''}
-              >
-                <div class="flex items-start gap-6 md:gap-10">
-                  <time
-                    class="text-xs tabular-nums shrink-0 mt-1 w-16"
-                    style="color: var(--global-text-color-muted);"
-                  >
-                    {formatDate(post.data.date)}
-                  </time>
-                  <div class="flex-1 min-w-0">
-                    <h3
-                      class="text-base md:text-lg font-medium mb-2 transition-colors group-hover:text-[var(--global-theme-color)]"
-                      style="color: var(--global-text-color);"
-                    >
-                      {post.data.title}
-                    </h3>
-                    {post.data.description && (
-                      <p class="text-sm line-clamp-2" style="color: var(--global-text-color-light);">
-                        {post.data.description}
-                      </p>
-                    )}
-                    {post.data.tags && post.data.tags.length > 0 && (
-                      <div class="flex gap-2 mt-3">
-                        {post.data.tags.slice(0, 3).map((tag) => (
-                          <span class="text-xs" style="color: var(--global-text-color-muted);">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  {post.data.image && (
-                    <div class="hidden md:block shrink-0 w-24 h-16 overflow-hidden rounded-sm">
-                      <img
-                        src={post.data.image}
-                        alt=""
-                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
-                  )}
-                </div>
-              </a>
-            ))
-          }
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <script is:inline data-astro-rerun>
-    (function() {
-      // --- Gallery Lightbox ---
-      const images = [
-        { src: 'https://picsum.photos/seed/anime1/800/1000' },
-        { src: 'https://picsum.photos/seed/anime2/800/1000' },
-        { src: 'https://picsum.photos/seed/anime3/800/1000' },
-        { src: 'https://picsum.photos/seed/anime4/800/1000' },
-        { src: 'https://picsum.photos/seed/anime5/800/1000' },
-      ];
-
-      const thumbs = document.querySelectorAll('.gallery-thumb');
-      const lightbox = document.getElementById('lightbox');
-      const lightboxImg = document.getElementById('lightbox-img');
-      const lightboxCounter = document.getElementById('lightbox-counter');
-      const closeBtn = document.getElementById('lightbox-close');
-      const prevBtn = document.getElementById('lightbox-prev');
-      const nextBtn = document.getElementById('lightbox-next');
-
-      let current = 0;
-
-      function open(index) {
-        current = index;
-        updateImage();
-        lightbox.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-      }
-
-      function close() {
-        lightbox.classList.add('hidden');
-        document.body.style.overflow = '';
-      }
-
-      function updateImage() {
-        lightboxImg.src = images[current].src;
-        lightboxCounter.textContent = (current + 1) + ' / ' + images.length;
-      }
-
-      function next() {
-        current = (current + 1) % images.length;
-        updateImage();
-      }
-
-      function prev() {
-        current = (current - 1 + images.length) % images.length;
-        updateImage();
-      }
-
-      thumbs.forEach((thumb, i) => {
-        thumb.addEventListener('click', () => open(i));
-      });
-
-      closeBtn?.addEventListener('click', close);
-      nextBtn?.addEventListener('click', next);
-      prevBtn?.addEventListener('click', prev);
-
-      lightbox?.addEventListener('click', (e) => {
-        if (e.target === lightbox) close();
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (lightbox?.classList.contains('hidden')) return;
-        if (e.key === 'Escape') close();
-        if (e.key === 'ArrowRight') next();
-        if (e.key === 'ArrowLeft') prev();
-      });
-    })();
-  </script>
-
-  <style>
-    .gallery-wall {
-      display: grid;
-      grid-template-columns: 1fr 2fr 1fr;
-      grid-template-rows: 1fr 1fr;
-      gap: 20px;
-      align-items: start;
-      min-height: 520px;
-    }
-
-    .gallery-wall .gallery-thumb {
-      border: none;
-      padding: 0;
-      cursor: pointer;
-      background: none;
-      overflow: hidden;
-    }
-
-    /* Left top - portrait, aligned left */
-    .gallery-wall .gallery-thumb:nth-child(1) {
-      grid-column: 1;
-      grid-row: 1;
-      aspect-ratio: 3 / 4;
-      width: 75%;
-      justify-self: start;
-      align-self: start;
-    }
-
-    /* Left bottom - landscape, aligned right */
-    .gallery-wall .gallery-thumb:nth-child(2) {
-      grid-column: 1;
-      grid-row: 2;
-      aspect-ratio: 4 / 3;
-      width: 85%;
-      justify-self: end;
-      align-self: end;
-    }
-
-    /* Center - tall portrait, spans both rows */
-    .gallery-wall .gallery-thumb:nth-child(3) {
-      grid-column: 2;
-      grid-row: 1 / 3;
-      aspect-ratio: 2 / 3;
-      height: 100%;
-      justify-self: center;
-      align-self: center;
-    }
-
-    /* Right top - landscape, aligned right */
-    .gallery-wall .gallery-thumb:nth-child(4) {
-      grid-column: 3;
-      grid-row: 1;
-      aspect-ratio: 4 / 3;
-      width: 75%;
-      justify-self: end;
-      align-self: start;
-    }
-
-    /* Right bottom - portrait, aligned left */
-    .gallery-wall .gallery-thumb:nth-child(5) {
-      grid-column: 3;
-      grid-row: 2;
-      aspect-ratio: 3 / 4;
-      width: 85%;
-      justify-self: start;
-      align-self: end;
-    }
-
-    @media (max-width: 768px) {
-      .gallery-wall {
-        grid-template-columns: 1fr 1.8fr 1fr;
-        gap: 10px;
-        min-height: 360px;
-      }
-
-      .gallery-wall .gallery-thumb:nth-child(1) {
-        width: 82%;
-      }
-
-      .gallery-wall .gallery-thumb:nth-child(2) {
-        width: 90%;
-      }
-
-      .gallery-wall .gallery-thumb:nth-child(4) {
-        width: 82%;
-      }
-
-      .gallery-wall .gallery-thumb:nth-child(5) {
-        width: 90%;
-      }
-    }
-  </style>
-</Base>
+		<section aria-label="Recent posts list">
+			<h2 class="non-toggle-h2 mb-6">
+				<strong class="font-semibold">最新文章</strong>
+			</h2>
+			<ul class="space-y-4">
+				{
+					posts.map((post) => (
+						<li class="flex max-w-full flex-col flex-wrap gap-1.5">
+							<div class="flex items-baseline gap-2">
+								<time class="text-sm text-accent">{formatDate(post.data.date)}</time>
+							</div>
+							<a
+								href={getNavLink(`/blog/${post.id}/`)}
+								class="site-page-link text-lg font-semibold"
+							>
+								{post.data.title}
+							</a>
+							{post.data.description && (
+								<p class="text-sm text-textColor/70">{post.data.description}</p>
+							)}
+						</li>
+						))
+					}
+				</ul>
+				<span class="mt-4 block sm:text-end">
+					<a
+						class="sm:hover:text-accent inline-flex items-center gap-1"
+						href={getNavLink("/blog/")}
+						aria-label="View all posts"
+					>
+						查看全部
+						<Icon class="h-4 w-4" name={"next"} aria-hidden="true" focusable="false" />
+					</a>
+				</span>
+			</section>
+		</div>
+	</PageLayout>

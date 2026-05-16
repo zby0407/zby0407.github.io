@@ -1,0 +1,48 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import { getCollection } from "astro:content";
+import TagPill from "@/components/blog/TagPill.astro";
+
+const posts = (await getCollection("posts")).filter(
+  (p) => !p.data.hidden && !p.data.draft,
+);
+
+const tagCounts = new Map<string, number>();
+posts.forEach((post) => {
+  post.data.tags.forEach((tag) => {
+    tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  });
+});
+
+const allTags = Array.from(tagCounts.entries())
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count);
+
+const meta = {
+  title: "标签",
+  description: "所有文章标签",
+};
+---
+
+<PageLayout meta={meta}>
+  <div class="max-w-[708px] sm:mr-20">
+    <h1 class="title mb-8">标签</h1>
+    {
+      allTags.length > 0 ? (
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {allTags.map((tag) => (
+            <TagPill
+              tag={tag.name}
+              count={tag.count}
+              class="justify-center px-4 py-2"
+              title={`查看标签「${tag.name}」的文章`}
+              data-astro-prefetch
+            />
+          ))}
+        </div>
+      ) : (
+        <p class="text-textColor/60">暂无标签</p>
+      )
+    }
+  </div>
+</PageLayout>

@@ -1,0 +1,16 @@
+---
+interface Props {
+	src: string;
+	caption?: string;
+}
+
+const { src, caption } = Astro.props;
+---
+
+<figure class="my-4">
+	<audio class="w-full rounded-lg" controls preload="metadata">
+		<source src={src} />
+		Your browser does not support the audio element.
+	</audio>
+	{caption && <figcaption class="mt-1 text-center text-xs text-textColor/60">{caption}</figcaption>}
+</figure>

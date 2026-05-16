@@ -1,16 +1,25 @@
 {
-  "extends": "astro/tsconfigs/strict",
+  "extends": "astro/tsconfigs/strictest",
   "compilerOptions": {
     "baseUrl": ".",
+    "verbatimModuleSyntax": true,
+    "lib": ["DOM", "ES2021"],
     "paths": {
-      "@components/*": ["src/components/*"],
-      "@layouts/*": ["src/layouts/*"],
-      "@styles/*": ["src/styles/*"],
-      "@assets/*": ["src/assets/*"],
-      "@config/*": ["src/config/*"],
-      "@utils/*": ["src/utils/*"],
+      "@/styles": ["src/styles/global.css"],
+      "@/*": ["src/*"],
+      "@/assets/*": ["src/assets/*"],
+      "@/components/*": ["src/components/*"],
+      "@/layouts/*": ["src/layouts/*"],
+      "@/utils": ["src/utils/index.ts"],
+      "@/utils/*": ["src/utils/*.ts"],
+      "@/types": ["src/types.ts"],
+      "@/lib/*": ["src/lib/*"],
+      "@/siteInfo": ["src/site.config.ts"],
       "@content/*": ["src/content/*"],
-      "@data/*": ["src/data/*"]
+      "@data/*": ["src/data/*"],
+      "@config/*": ["src/config/*"]
     }
-  }
+  },
+  "include": ["src", "*.ts"],
+  "exclude": ["node_modules", "**/node_modules/*", ".vscode", "dist"]
 }

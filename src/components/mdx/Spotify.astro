@@ -1,0 +1,19 @@
+---
+interface Props {
+	uri: string;
+}
+
+const { uri } = Astro.props;
+const embedUrl = `https://open.spotify.com/embed/${uri}`;
+---
+
+<div class="my-4">
+	<iframe
+		class="block h-[152px] w-full rounded-xl"
+		src={embedUrl}
+		frameborder="0"
+		allow="encrypted-media"
+		loading="lazy"
+		title="Spotify embed"
+	></iframe>
+</div>

@@ -1,0 +1,77 @@
+{
+  // Site information
+  "site-info": {
+    "title": "Horo's Parchment",
+    "description": "賢狼の羊皮紙",
+    "author": "ホロ",
+    "lang": "zh-CN",
+    "custom-domain": "",
+    "base-path": "",
+  },
+
+  // Collections and listings
+  "collections-and-listings": {
+    "home-page-slug": "home",
+    "number-of-posts-per-page": 10,
+    "recent-posts-on-home-page": 5,
+    "listing-view": "list",
+    "hide-underscore-slugs-in-lists": false,
+  },
+
+  // Theme
+  "theme": {
+    "colors": {
+      "bg": {
+        "light": "249 249 249",
+        "dark": "28 30 32",
+      },
+      "text": {
+        "light": "34 39 42",
+        "dark": "255 255 255",
+      },
+      "link": {
+        "light": "85 123 118",
+        "dark": "199 200 203",
+      },
+      "accent": {
+        "light": "184 134 11",
+        "dark": "212 168 67",
+      },
+      "accent-2": {
+        "light": "17 17 17",
+        "dark": "237 237 237",
+      },
+      "quote": {
+        "light": "184 134 11",
+        "dark": "212 168 67",
+      },
+    },
+    "fontfamily-google-fonts": {
+      "sans-font-name": "Noto Serif SC",
+      "mono-font-name": "JetBrains Mono",
+    },
+  },
+
+  // Block rendering
+  "block-rendering": {
+    "enable-lightbox": true,
+  },
+
+  // Socials
+  "socials": {
+    "github": "zby0407",
+    "email": "fen0407@126.com",
+  },
+
+  // Comments
+  "comments": {},
+
+  // Tracking
+  "tracking": {},
+
+  // OG setup
+  "og-setup": {
+    "columns": 1,
+    "excerpt": false,
+  },
+}

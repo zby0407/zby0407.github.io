@@ -1,25 +1,18 @@
 ---
-import { site } from '@config/site';
-import Base from '@layouts/Base.astro';
+import { Image } from "astro:assets";
+import PageLayout from "@/layouts/Base.astro";
+import img404 from "@/assets/404-Error-with-a-cute-animal-amico.svg";
+
+const meta = {
+	title: "Oops! You found a missing page!",
+	description: "Oops! It looks like this page is lost in space!",
+};
 ---
 
-<Base title="404 — Page Not Found" noindex>
-  <div class="page-container py-16 text-center" style="min-height: calc(100vh - 57px - 4rem);">
-    <h1
-      class="mb-4 text-8xl font-bold"
-      style="color: var(--global-theme-color); font-family: var(--font-condensed);"
-    >
-      404
-    </h1>
-    <p class="mb-2 text-xl" style="color: var(--global-text-color);">Page not found</p>
-    <p class="mb-8 text-sm" style="color: var(--global-text-color-light);">
-      The page you were looking for doesn't exist or has been moved.
-    </p>
-    <a
-      href={`${site.base}/`}
-      style="color: var(--global-theme-color); text-decoration: none; font-weight: 500;"
-    >
-      &larr; Go back home
-    </a>
-  </div>
-</Base>
+<PageLayout meta={meta}>
+	<h1 class="title mb-6">404 | Oops something went wrong</h1>
+	<p class="mb-8">Please use the navigation to find your way back</p>
+	<div class="my-4 grid justify-center">
+		<Image loading="eager" src={img404} alt="A cat is lost!" />
+	</div>
+</PageLayout>

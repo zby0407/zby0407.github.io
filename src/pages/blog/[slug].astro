@@ -1,21 +1,244 @@
 ---
-import PostLayout from '@layouts/Post.astro';
-import { getCollection, render } from 'astro:content';
-import { relatedPosts } from '@utils/posts';
+import PageLayout from "@/layouts/Base.astro";
+import { getCollection, render } from "astro:content";
+import { getNavLink } from "@/lib/blog-helpers";
+import type { GetStaticPaths } from "astro";
+import FormattedDate from "@/components/ui/FormattedDate.astro";
+import TOC from "@/components/blog/TOC.astro";
+import TagPill from "@/components/blog/TagPill.astro";
+import Icon from "@/components/ui/Icon.astro";
+import { areDifferentDates } from "@/utils/date";
 
-export async function getStaticPaths() {
-  const posts = await getCollection('posts');
+export const getStaticPaths = (async () => {
+  const posts = await getCollection("posts");
   return posts.map((post) => ({
     params: { slug: post.id },
-    props: { post, allPosts: posts },
+    props: { post },
   }));
-}
+}) satisfies GetStaticPaths;
 
-const { post, allPosts } = Astro.props;
+const { post } = Astro.props;
 const { Content, headings } = await render(post);
-const related = relatedPosts(post, allPosts, 3);
+
+const dateTimeOptions: Intl.DateTimeFormatOptions = {
+  month: "long",
+};
+
+const showToc = post.data.toc !== false && headings.length > 0;
 ---
 
-<PostLayout post={post} headings={headings} related={related}>
-  <Content />
-</PostLayout>
+<PageLayout
+  meta={{
+    title: post.data.title,
+    description: post.data.description || "",
+    articleDate: post.data.date.toISOString(),
+  }}
+>
+  <div class="max-w-[708px] sm:mr-20 xl:mr-72 print:mr-auto print:max-w-full">
+    <article class="break-words" data-pagefind-body>
+      <div id="blog-hero">
+        <h1
+          class="title mb-3 sm:mb-1"
+          data-pagefind-filter={`collections:${post.collection}`}
+          data-pagefind-weight="10"
+        >
+          {post.data.title}
+        </h1>
+        {post.data.description && (
+          <q class="mb-2 block italic">{post.data.description}</q>
+        )}
+        <div class="flex max-w-full flex-wrap items-center gap-x-3 gap-y-2">
+          <p class="font-semibold">
+            <FormattedDate date={post.data.date} dateTimeOptions={dateTimeOptions} />
+          </p>
+          {post.data.lastmod && areDifferentDates(post.data.date, post.data.lastmod) && (
+            <span class="bg-quote/10 text-quote rounded-lg p-1 text-sm">
+              {"更新于："}
+              <FormattedDate
+                class="ms-1"
+                date={post.data.lastmod}
+                dateTimeOptions={dateTimeOptions}
+              />
+            </span>
+          )}
+        </div>
+        {post.data.tags && post.data.tags.length > 0 && (
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <Icon
+              class="me-1 inline-block h-4 w-4"
+              name="tag-outline"
+              aria-hidden="true"
+              focusable="false"
+            />
+            {post.data.tags.map((tag) => (
+              <TagPill tag={tag} />
+            ))}
+          </div>
+        )}
+      </div>
+      <hr class="divider bg-accent/30 mx-auto my-4 h-1 w-full rounded-sm border-none" />
+      <div class="mt-8">
+        <div class="mdx-notion">
+          <Content />
+        </div>
+      </div>
+    </article>
+    {showToc && <TOC headings={headings} />}
+  </div>
+  <button id="to-top-btn" class="to-top-btn" aria-label="Back to Top" data-show="false">
+    <Icon name="to-top" class="h-6 w-6" aria-label="Go Back to Top" stroke-linecap="round" />
+  </button>
+</PageLayout>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const scrollBtn = document.getElementById("to-top-btn");
+    const targetHeader = document.getElementById("blog-hero");
+
+    function callback(entries: IntersectionObserverEntry[]) {
+      entries.forEach((entry) => {
+        if (entry.target === targetHeader) {
+          scrollBtn!.dataset.show = (!entry.isIntersecting).toString();
+        }
+      });
+    }
+
+    scrollBtn!.addEventListener("click", () => {
+      document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    const observer = new IntersectionObserver(callback);
+    observer.observe(targetHeader!);
+
+    // Sidenotes: move footnotes to the margin beside their references
+    const article = document.querySelector("article[data-pagefind-body]");
+    const footnotesSection = article?.querySelector(".footnotes");
+    if (footnotesSection) {
+      const refLinks = article.querySelectorAll("a[data-footnote-ref]");
+      refLinks.forEach((ref) => {
+        const href = ref.getAttribute("href");
+        if (!href) return;
+        const fnId = href.replace("#", "");
+        const fnLi = footnotesSection.querySelector(`#${CSS.escape(fnId)}`);
+        if (!fnLi) return;
+
+        // Extract the numeric index from the footnote id (e.g. "user-content-fn-1" -> "1")
+        const fnIndex = fnId.replace("user-content-fn-", "");
+
+        const sidenote = document.createElement("span");
+        sidenote.className = "sidenote";
+        sidenote.dataset.sidenoteId = fnIndex;
+
+        const clone = fnLi.cloneNode(true) as HTMLElement;
+        clone.querySelectorAll("a[data-footnote-backref]").forEach((b) => b.remove());
+        clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+
+        const p = clone.querySelector("p");
+        const content = p ? p.innerHTML : clone.innerHTML;
+        sidenote.innerHTML = `<span class="sidenote-number">[${fnIndex}]</span> ${content}`;
+
+        const sup = ref.closest("sup");
+        if (sup) {
+          sup.dataset.sidenoteId = fnIndex;
+          sup.after(sidenote);
+
+          // Cross-highlight on hover
+          sup.addEventListener("mouseenter", () => {
+            sidenote.classList.add("sidenote-active");
+          });
+          sup.addEventListener("mouseleave", () => {
+            sidenote.classList.remove("sidenote-active");
+          });
+          sidenote.addEventListener("mouseenter", () => {
+            sup.classList.add("sidenote-ref-active");
+          });
+          sidenote.addEventListener("mouseleave", () => {
+            sup.classList.remove("sidenote-ref-active");
+          });
+        }
+      });
+
+      footnotesSection.classList.add("hidden-xl");
+    }
+  });
+</script>
+
+<style>
+  :global(.sidenote) {
+    display: none;
+  }
+  @media (min-width: 1280px) {
+    :global(.sidenote) {
+      display: block;
+      float: right;
+      clear: right;
+      width: 16rem;
+      margin-right: -18rem;
+      margin-top: -0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      color: var(--theme-text);
+      opacity: 0.8;
+    }
+    :global(.sidenote p) {
+      margin: 0;
+      display: inline;
+    }
+    :global(.sidenote-number) {
+      color: var(--theme-accent);
+      font-weight: 600;
+      margin-right: 0.25rem;
+    }
+    :global(.sidenote-active) {
+      opacity: 1 !important;
+      background-color: color-mix(in srgb, var(--theme-accent) 8%, transparent);
+      border-radius: 0.25rem;
+      padding: 0.125rem 0.25rem;
+    }
+    :global(.sidenote-ref-active) {
+      color: var(--theme-accent);
+    }
+    :global(.footnotes.hidden-xl) {
+      display: none;
+    }
+  }
+
+  :global(.mdx-notion h1),
+  :global(.mdx-notion h2),
+  :global(.mdx-notion h3),
+  :global(.mdx-notion h4),
+  :global(.mdx-notion h5),
+  :global(.mdx-notion h6) {
+    position: relative;
+  }
+
+  :global(.mdx-notion h1 .anchor-link),
+  :global(.mdx-notion h2 .anchor-link),
+  :global(.mdx-notion h3 .anchor-link),
+  :global(.mdx-notion h4 .anchor-link),
+  :global(.mdx-notion h5 .anchor-link),
+  :global(.mdx-notion h6 .anchor-link) {
+    position: absolute;
+    left: -1.2em;
+    top: 50%;
+    transform: translateY(-50%);
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  :global(.mdx-notion h1:hover .anchor-link),
+  :global(.mdx-notion h2:hover .anchor-link),
+  :global(.mdx-notion h3:hover .anchor-link),
+  :global(.mdx-notion h4:hover .anchor-link),
+  :global(.mdx-notion h5:hover .anchor-link),
+  :global(.mdx-notion h6:hover .anchor-link) {
+    opacity: 1;
+  }
+
+  :global(.anchor-icon) {
+    color: var(--theme-accent);
+    font-size: 0.85em;
+    font-weight: 500;
+  }
+</style>

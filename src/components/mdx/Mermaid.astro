@@ -1,0 +1,58 @@
+---
+---
+
+<div class="mermaid-diagram my-4 flex justify-center overflow-x-auto rounded-lg bg-white p-4 dark:bg-stone-900" data-mermaid>
+  <pre class="mermaid-source hidden"><slot /></pre>
+</div>
+
+<script>
+  import mermaid from "mermaid";
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: "default",
+    darkMode: false,
+  });
+
+  async function renderMermaid() {
+    const isDark = document.documentElement.classList.contains("dark");
+    mermaid.initialize({
+      theme: isDark ? "dark" : "default",
+    });
+
+    const containers = document.querySelectorAll("[data-mermaid]");
+    for (const container of containers) {
+      const sourceEl = container.querySelector(".mermaid-source");
+      if (!sourceEl) continue;
+
+      const source = sourceEl.textContent?.trim() || "";
+      if (!source) continue;
+
+      try {
+        const id = "mermaid-" + Math.random().toString(36).slice(2);
+        const { svg } = await mermaid.render(id, source);
+        container.innerHTML = svg;
+      } catch (err) {
+        console.error("Mermaid render error:", err);
+        container.innerHTML = `<pre class="text-red-500">Mermaid render error</pre>`;
+      }
+    }
+  }
+
+  // Render on load
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", renderMermaid);
+  } else {
+    renderMermaid();
+  }
+
+  // Re-render on theme change
+  const observer = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.attributeName === "class" && m.target === document.documentElement) {
+        renderMermaid();
+      }
+    }
+  });
+  observer.observe(document.documentElement, { attributes: true });
+</script>

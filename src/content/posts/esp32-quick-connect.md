@@ -5,9 +5,6 @@ description: ESP32 连接 deepmem 服务器进行实时语音对话的完整指�
 tags: [ESP32, WebSocket, 物联网]
 categories: [技术]
 ---
-
-# deepmem ESP32 连接方法
-
 这份文档只说明 ESP32 如何连接当前服务器并进行实时语音对话。
 
 ## 1. 创建 ESP32 设备

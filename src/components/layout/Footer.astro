@@ -1,0 +1,32 @@
+---
+import { getMenu } from "@/utils";
+import { normalizeNavPath } from "@/lib/blog-helpers";
+import SocialList from "@/components/ui/SocialList.astro";
+
+const menuLinks = getMenu();
+const currentPath = normalizeNavPath(Astro.url.pathname);
+---
+
+<footer class="site-footer" id="main-footer">
+	<nav aria-label="More on this site" class="footer-nav">
+		{
+			menuLinks.map((link, index) => (
+				<>
+					<a
+						href={link.path}
+						class="footer-link"
+						aria-current={currentPath === normalizeNavPath(link.path) ? "page" : false}
+					>
+						{link.title}
+					</a>
+					{index < menuLinks.length - 1 && (
+						<div class="footer-separator" aria-hidden="true">
+							<p>•</p>
+						</div>
+					)}
+				</>
+			))
+		}
+	</nav>
+	<SocialList />
+</footer>

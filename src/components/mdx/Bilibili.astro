@@ -1,0 +1,22 @@
+---
+interface Props {
+	bvid: string;
+	page?: number;
+	title?: string;
+}
+
+const { bvid, page = 1, title = "Bilibili video" } = Astro.props;
+const embedUrl = `https://player.bilibili.com/player.html?bvid=${bvid}&page=${page}&high_quality=1&danmaku=0`;
+---
+
+<div class="my-4 aspect-video w-full overflow-hidden rounded-lg">
+	<iframe
+		class="h-full w-full"
+		src={embedUrl}
+		title={title}
+		frameborder="0"
+		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+		allowfullscreen
+		loading="lazy"
+	></iframe>
+</div>
