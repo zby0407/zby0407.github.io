@@ -1,29 +1,391 @@
 ---
+interface Props {
+  /** Mermaid diagram source. If provided, takes precedence over slot content. */
+  code?: string;
+}
+
+const { code } = Astro.props;
 ---
 
-<div class="mermaid-diagram my-4 flex justify-center overflow-x-auto rounded-lg bg-white p-4 dark:bg-stone-900" data-mermaid>
-  <pre class="mermaid-source hidden"><slot /></pre>
+<div class="mermaid-wrapper my-4 rounded-lg border border-gray-200 dark:border-gray-700" data-mermaid-wrapper>
+  <!-- Normal view -->
+  <div class="mermaid-normal">
+    <div class="mermaid-toolbar flex items-center justify-end gap-1 border-b border-gray-200 bg-gray-50 px-3 py-1.5 dark:border-gray-700 dark:bg-gray-800">
+      <button class="mermaid-zoom-btn" data-fullscreen title="全屏查看" aria-label="全屏查看">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+    </div>
+    <div class="mermaid-diagram overflow-auto bg-white p-4 dark:bg-[#1e1e1e]" data-mermaid>
+      <div class="mermaid-svg-wrapper" data-mermaid-scale="1">
+        <pre class="mermaid-source hidden">{code ? code : <slot />}</pre>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Fullscreen overlay (shared, cloned into) -->
+<div class="mermaid-fullscreen-overlay hidden" data-mermaid-overlay>
+  <div class="mermaid-fullscreen-backdrop"></div>
+  <div class="mermaid-fullscreen-content">
+    <div class="mermaid-fullscreen-toolbar">
+      <button class="mermaid-zoom-btn" data-zoom="out" title="缩小" aria-label="缩小">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <span class="mermaid-zoom-level" data-zoom-level>100%</span>
+      <button class="mermaid-zoom-btn" data-zoom="in" title="放大" aria-label="放大">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <button class="mermaid-zoom-btn" data-zoom="reset" title="重置" aria-label="重置">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </button>
+      <div class="flex-1"></div>
+      <button class="mermaid-zoom-btn" data-close-fullscreen title="退出全屏" aria-label="退出全屏">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M10 14l-7 7"/></svg>
+      </button>
+    </div>
+    <div class="mermaid-fullscreen-diagram" data-fullscreen-diagram>
+      <!-- SVG will be cloned here -->
+    </div>
+  </div>
+</div>
+
+<style>
+  .mermaid-toolbar {
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+  .mermaid-diagram {
+    border-radius: 0 0 0.5rem 0.5rem;
+    min-height: 100px;
+  }
+  .mermaid-zoom-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mermaid-zoom-btn:hover {
+    background: rgba(0,0,0,0.06);
+    border-color: rgba(0,0,0,0.1);
+  }
+  .dark .mermaid-zoom-btn {
+    color: #aaa;
+  }
+  .dark .mermaid-zoom-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+  }
+  /* Ensure SVG text is visible */
+  .mermaid-svg-wrapper :global(svg) {
+    max-width: none !important;
+    height: auto !important;
+  }
+  .mermaid-svg-wrapper :global(svg .node text),
+  .mermaid-svg-wrapper :global(svg text) {
+    font-family: system-ui, -apple-system, sans-serif !important;
+  }
+
+  /* ─── Dark mode Mermaid comprehensive overrides ─── */
+  /* Target nodes by their inline style attribute which contains the fill color */
+
+  /* Red tones (#fecaca, #fee2e2, #fca5a5) → dark red */
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fecaca"]),
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fee2e2"]),
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fca5a5"]) {
+    --mermaid-dark-fill: #7f1d1d;
+    --mermaid-dark-stroke: #ef4444;
+    --mermaid-dark-text: #fca5a5;
+  }
+
+  /* Green tones (#bbf7d0, #86efac, #dcfce7) → dark green */
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#bbf7d0"]),
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#86efac"]),
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#dcfce7"]) {
+    --mermaid-dark-fill: #14532d;
+    --mermaid-dark-stroke: #22c55e;
+    --mermaid-dark-text: #86efac;
+  }
+
+  /* Blue tones (#dbeafe) → dark blue */
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#dbeafe"]) {
+    --mermaid-dark-fill: #1e3a5f;
+    --mermaid-dark-stroke: #3b82f6;
+    --mermaid-dark-text: #93c5fd;
+  }
+
+  /* Yellow/Cream tones (#fef3c7) → dark amber */
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fef3c7"]) {
+    --mermaid-dark-fill: #713f12;
+    --mermaid-dark-stroke: #f59e0b;
+    --mermaid-dark-text: #fcd34d;
+  }
+
+  /* Purple tones (#e9d5ff) → dark purple */
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#e9d5ff"]) {
+    --mermaid-dark-fill: #581c87;
+    --mermaid-dark-stroke: #a855f7;
+    --mermaid-dark-text: #d8b4fe;
+  }
+
+  /* Pink tones (#fce7f3) → dark pink */
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fce7f3"]) {
+    --mermaid-dark-fill: #831843;
+    --mermaid-dark-stroke: #ec4899;
+    --mermaid-dark-text: #f9a8d4;
+  }
+
+  /* Apply dark colors to targeted nodes */
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"]) {
+    fill: var(--mermaid-dark-fill, #1f2937) !important;
+    stroke: var(--mermaid-dark-stroke, #6b7280) !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] rect),
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] circle),
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] polygon),
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] ellipse) {
+    fill: var(--mermaid-dark-fill, #1f2937) !important;
+    stroke: var(--mermaid-dark-stroke, #6b7280) !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] .label),
+  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] .label text) {
+    fill: var(--mermaid-dark-text, #f3f4f6) !important;
+    color: var(--mermaid-dark-text, #f3f4f6) !important;
+  }
+
+  /* Default nodes (no custom fill) in dark mode */
+  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"])) rect,
+  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"])) circle,
+  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"])) polygon {
+    fill: #1f2937 !important;
+    stroke: #4b5563 !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"]) .label) {
+    color: #e5e7eb !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"]) .label text) {
+    fill: #e5e7eb !important;
+  }
+
+  /* Override Mermaid's inline text color */
+  .dark .mermaid-svg-wrapper :global(svg .node .label text) {
+    fill: #f3f4f6 !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .node .label span) {
+    color: #f3f4f6 !important;
+  }
+
+  /* Clusters/subgraphs */
+  .dark .mermaid-svg-wrapper :global(svg .cluster rect) {
+    fill: rgba(31, 41, 55, 0.6) !important;
+    stroke: #4b5563 !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .cluster .label) {
+    color: #d1d5db !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .cluster-label text) {
+    fill: #9ca3af !important;
+  }
+
+  /* Edge labels */
+  .dark .mermaid-svg-wrapper :global(svg .edgeLabel rect) {
+    fill: #1f2937 !important;
+    stroke: #4b5563 !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .edgeLabel .label) {
+    color: #e5e7eb !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .edgeLabel text) {
+    fill: #e5e7eb !important;
+  }
+
+  /* Lines and arrows */
+  .dark .mermaid-svg-wrapper :global(svg .flowchart-link) {
+    stroke: #9ca3af !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg .edgePath .path) {
+    stroke: #9ca3af !important;
+  }
+  .dark .mermaid-svg-wrapper :global(svg marker path) {
+    fill: #9ca3af !important;
+    stroke: #9ca3af !important;
+  }
+
+  /* Fullscreen dark overrides */
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fecaca"]),
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fee2e2"]),
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fca5a5"]) {
+    --mermaid-dark-fill: #7f1d1d;
+    --mermaid-dark-stroke: #ef4444;
+    --mermaid-dark-text: #fca5a5;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#bbf7d0"]),
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#86efac"]),
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#dcfce7"]) {
+    --mermaid-dark-fill: #14532d;
+    --mermaid-dark-stroke: #22c55e;
+    --mermaid-dark-text: #86efac;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#dbeafe"]) {
+    --mermaid-dark-fill: #1e3a5f;
+    --mermaid-dark-stroke: #3b82f6;
+    --mermaid-dark-text: #93c5fd;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fef3c7"]) {
+    --mermaid-dark-fill: #713f12;
+    --mermaid-dark-stroke: #f59e0b;
+    --mermaid-dark-text: #fcd34d;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#e9d5ff"]) {
+    --mermaid-dark-fill: #581c87;
+    --mermaid-dark-stroke: #a855f7;
+    --mermaid-dark-text: #d8b4fe;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fce7f3"]) {
+    --mermaid-dark-fill: #831843;
+    --mermaid-dark-stroke: #ec4899;
+    --mermaid-dark-text: #f9a8d4;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"]) {
+    fill: var(--mermaid-dark-fill, #1f2937) !important;
+    stroke: var(--mermaid-dark-stroke, #6b7280) !important;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"] rect),
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"] circle),
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"] polygon) {
+    fill: var(--mermaid-dark-fill, #1f2937) !important;
+    stroke: var(--mermaid-dark-stroke, #6b7280) !important;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"] .label text) {
+    fill: var(--mermaid-dark-text, #f3f4f6) !important;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .node:not([style*="fill:#"]) rect) {
+    fill: #1f2937 !important;
+    stroke: #4b5563 !important;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .cluster rect) {
+    fill: rgba(31, 41, 55, 0.6) !important;
+    stroke: #4b5563 !important;
+  }
+  .dark .mermaid-fullscreen-diagram :global(svg .edgeLabel rect) {
+    fill: #1f2937 !important;
+    stroke: #4b5563 !important;
+  }
+
+  /* Fullscreen overlay */
+  .mermaid-fullscreen-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mermaid-fullscreen-overlay.hidden {
+    display: none;
+  }
+  .mermaid-fullscreen-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+  }
+  .mermaid-fullscreen-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: 95vw;
+    height: 90vh;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+  .dark .mermaid-fullscreen-content {
+    background: #1e1e1e;
+  }
+  .mermaid-fullscreen-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    flex-shrink: 0;
+  }
+  .dark .mermaid-fullscreen-toolbar {
+    border-bottom-color: #374151;
+    background: #111827;
+  }
+  .mermaid-zoom-level {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    min-width: 48px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .dark .mermaid-zoom-level {
+    color: #d1d5db;
+  }
+  .mermaid-fullscreen-diagram {
+    flex: 1;
+    overflow: auto;
+    padding: 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .mermaid-fullscreen-diagram svg {
+    max-width: none !important;
+    height: auto !important;
+    transition: transform 0.15s ease;
+    transform-origin: center top;
+  }
+</style>
 
 <script>
   import mermaid from "mermaid";
 
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: "default",
-    darkMode: false,
-  });
+  // Fullscreen state
+  let activeWrapper: HTMLElement | null = null;
+  let activeSvg: SVGElement | null = null;
+  let fullscreenScale = 1;
+  const overlay = document.querySelector<HTMLElement>("[data-mermaid-overlay]");
+  const fullscreenDiagram = document.querySelector<HTMLElement>("[data-fullscreen-diagram]");
+  const zoomLevelEl = document.querySelector<HTMLElement>("[data-zoom-level]");
+
+  function getTheme() {
+    const isDark = document.documentElement.classList.contains("dark");
+    return isDark ? "dark" : "default";
+  }
 
   async function renderMermaid() {
-    const isDark = document.documentElement.classList.contains("dark");
+    const isDark = getTheme() === "dark";
     mermaid.initialize({
-      theme: isDark ? "dark" : "default",
+      startOnLoad: false,
+      theme: "base",
+      themeVariables: {
+        primaryColor: isDark ? "#1f2937" : "#f3f4f6",
+        primaryTextColor: isDark ? "#f3f4f6" : "#1f2937",
+        primaryBorderColor: isDark ? "#6b7280" : "#d1d5db",
+        lineColor: isDark ? "#9ca3af" : "#6b7280",
+        secondaryColor: isDark ? "#374151" : "#e5e7eb",
+        tertiaryColor: isDark ? "#1f2937" : "#f9fafb",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+      },
     });
 
-    const containers = document.querySelectorAll("[data-mermaid]");
-    for (const container of containers) {
-      const sourceEl = container.querySelector(".mermaid-source");
-      if (!sourceEl) continue;
+    const wrappers = document.querySelectorAll<HTMLElement>("[data-mermaid-wrapper]");
+    for (const wrapper of wrappers) {
+      const scaleWrap = wrapper.querySelector<HTMLElement>("[data-mermaid-scale]");
+      const sourceEl = wrapper.querySelector(".mermaid-source");
+      if (!scaleWrap || !sourceEl) continue;
 
       const source = sourceEl.textContent?.trim() || "";
       if (!source) continue;
@@ -31,19 +393,209 @@
       try {
         const id = "mermaid-" + Math.random().toString(36).slice(2);
         const { svg } = await mermaid.render(id, source);
-        container.innerHTML = svg;
+        scaleWrap.innerHTML = svg;
+
+        const svgEl = scaleWrap.querySelector("svg");
+        if (svgEl) {
+          svgEl.style.maxWidth = "none";
+          svgEl.style.height = "auto";
+          // Apply dark mode color overrides directly to SVG
+          if (isDark) {
+            applyDarkModeColors(svgEl);
+          }
+        }
       } catch (err) {
         console.error("Mermaid render error:", err);
-        container.innerHTML = `<pre class="text-red-500">Mermaid render error</pre>`;
+        scaleWrap.innerHTML = `<pre class="text-red-500 p-4">Mermaid render error</pre>`;
       }
     }
   }
 
+  // Color mapping for dark mode
+  const darkColorMap: Record<string, { fill: string; stroke: string; text: string }> = {
+    "#fecaca": { fill: "#7f1d1d", stroke: "#ef4444", text: "#fca5a5" },
+    "#fee2e2": { fill: "#7f1d1d", stroke: "#ef4444", text: "#fca5a5" },
+    "#fca5a5": { fill: "#7f1d1d", stroke: "#ef4444", text: "#fca5a5" },
+    "#bbf7d0": { fill: "#14532d", stroke: "#22c55e", text: "#86efac" },
+    "#86efac": { fill: "#14532d", stroke: "#22c55e", text: "#86efac" },
+    "#dcfce7": { fill: "#14532d", stroke: "#22c55e", text: "#86efac" },
+    "#dbeafe": { fill: "#1e3a5f", stroke: "#3b82f6", text: "#93c5fd" },
+    "#fef3c7": { fill: "#713f12", stroke: "#f59e0b", text: "#fcd34d" },
+    "#e9d5ff": { fill: "#581c87", stroke: "#a855f7", text: "#d8b4fe" },
+    "#fce7f3": { fill: "#831843", stroke: "#ec4899", text: "#f9a8d4" },
+  };
+
+  function applyDarkModeColors(svgEl: SVGElement) {
+    // Override the SVG's internal style block
+    const styleEl = svgEl.querySelector("style");
+    if (styleEl) {
+      let css = styleEl.textContent || "";
+      // Replace default light colors with dark ones
+      css = css.replace(/fill:#f3f4f6/g, "fill:#1f2937");
+      css = css.replace(/stroke:#d1d5db/g, "stroke:#4b5563");
+      css = css.replace(/fill:#1f2937/g, "fill:#f3f4f6"); // text color
+      css = css.replace(/color:#1f2937/g, "color:#f3f4f6");
+      css = css.replace(/fill:#e5e7eb/g, "fill:#1f2937"); // edge label bg
+      css = css.replace(/fill:#6b7280/g, "fill:#9ca3af"); // lines
+      css = css.replace(/stroke:#6b7280/g, "stroke:#9ca3af");
+      styleEl.textContent = css;
+    }
+
+    // Process nodes with custom fill colors
+    svgEl.querySelectorAll<SVGGElement>(".node").forEach((node) => {
+      const nodeStyle = node.getAttribute("style") || "";
+      const match = nodeStyle.match(/fill:([^\s!]+)/);
+      if (match) {
+        const originalColor = match[1].toLowerCase();
+        const darkColors = darkColorMap[originalColor];
+        if (darkColors) {
+          // Update the node's rect/circle/polygon fill
+          const shape = node.querySelector("rect, circle, polygon, ellipse");
+          if (shape) {
+            shape.setAttribute("fill", darkColors.fill);
+            shape.setAttribute("stroke", darkColors.stroke);
+          }
+          // Update text color
+          const label = node.querySelector(".label");
+          if (label) {
+            const textEls = label.querySelectorAll("text, span");
+            textEls.forEach((t) => {
+              (t as HTMLElement).style.fill = darkColors.text;
+              (t as HTMLElement).style.color = darkColors.text;
+            });
+          }
+        }
+      } else {
+        // Default node (no custom fill) - make it dark
+        const shape = node.querySelector("rect, circle, polygon, ellipse");
+        if (shape) {
+          shape.setAttribute("fill", "#1f2937");
+          shape.setAttribute("stroke", "#4b5563");
+        }
+        const label = node.querySelector(".label");
+        if (label) {
+          const textEls = label.querySelectorAll("text, span");
+          textEls.forEach((t) => {
+            (t as HTMLElement).style.fill = "#e5e7eb";
+            (t as HTMLElement).style.color = "#e5e7eb";
+          });
+        }
+      }
+    });
+
+    // Process clusters
+    svgEl.querySelectorAll<SVGGElement>(".cluster").forEach((cluster) => {
+      const rect = cluster.querySelector("rect");
+      if (rect) {
+        rect.setAttribute("fill", "rgba(31, 41, 55, 0.5)");
+        rect.setAttribute("stroke", "#4b5563");
+      }
+    });
+  }
+
+  function updateZoomDisplay() {
+    if (zoomLevelEl) {
+      zoomLevelEl.textContent = Math.round(fullscreenScale * 100) + "%";
+    }
+  }
+
+  function applyFullscreenScale() {
+    if (activeSvg) {
+      activeSvg.style.transform = `scale(${fullscreenScale})`;
+    }
+    updateZoomDisplay();
+  }
+
+  function openFullscreen(wrapper: HTMLElement) {
+    activeWrapper = wrapper;
+    const scaleWrap = wrapper.querySelector<HTMLElement>("[data-mermaid-scale]");
+    if (!scaleWrap || !overlay || !fullscreenDiagram) return;
+
+    const svg = scaleWrap.querySelector("svg");
+    if (!svg) return;
+
+    // Clone SVG for fullscreen
+    fullscreenDiagram.innerHTML = "";
+    activeSvg = svg.cloneNode(true) as SVGElement;
+    activeSvg.style.maxWidth = "none";
+    activeSvg.style.height = "auto";
+    fullscreenDiagram.appendChild(activeSvg);
+
+    fullscreenScale = 1;
+    applyFullscreenScale();
+
+    overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeFullscreen() {
+    if (overlay) overlay.classList.add("hidden");
+    document.body.style.overflow = "";
+    activeWrapper = null;
+    activeSvg = null;
+    fullscreenScale = 1;
+  }
+
+  function setupWrapper(wrapper: HTMLElement) {
+    const fullscreenBtn = wrapper.querySelector<HTMLButtonElement>("[data-fullscreen]");
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener("click", () => openFullscreen(wrapper));
+    }
+  }
+
+  function setupOverlayControls() {
+    if (!overlay) return;
+
+    // Close on backdrop click
+    overlay.querySelector(".mermaid-fullscreen-backdrop")?.addEventListener("click", closeFullscreen);
+
+    // Close button
+    overlay.querySelector<HTMLButtonElement>("[data-close-fullscreen]")?.addEventListener("click", closeFullscreen);
+
+    // Zoom controls
+    overlay.querySelectorAll<HTMLButtonElement>("[data-zoom]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const action = btn.dataset.zoom;
+        if (action === "in") {
+          fullscreenScale = Math.min(fullscreenScale + 0.25, 4);
+        } else if (action === "out") {
+          fullscreenScale = Math.max(fullscreenScale - 0.25, 0.25);
+        } else if (action === "reset") {
+          fullscreenScale = 1;
+        }
+        applyFullscreenScale();
+      });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener("keydown", (e) => {
+      if (!activeWrapper) return;
+      if (e.key === "Escape") {
+        closeFullscreen();
+      } else if (e.key === "+" || e.key === "=") {
+        fullscreenScale = Math.min(fullscreenScale + 0.25, 4);
+        applyFullscreenScale();
+      } else if (e.key === "-" || e.key === "_") {
+        fullscreenScale = Math.max(fullscreenScale - 0.25, 0.25);
+        applyFullscreenScale();
+      } else if (e.key === "0") {
+        fullscreenScale = 1;
+        applyFullscreenScale();
+      }
+    });
+  }
+
   // Render on load
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", renderMermaid);
+    document.addEventListener("DOMContentLoaded", () => {
+      renderMermaid();
+      document.querySelectorAll<HTMLElement>("[data-mermaid-wrapper]").forEach(setupWrapper);
+      setupOverlayControls();
+    });
   } else {
     renderMermaid();
+    document.querySelectorAll<HTMLElement>("[data-mermaid-wrapper]").forEach(setupWrapper);
+    setupOverlayControls();
   }
 
   // Re-render on theme change

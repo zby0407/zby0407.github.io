@@ -112,7 +112,7 @@ export default defineConfig({
 						type: "element",
 						tagName: "span",
 						properties: { class: "anchor-icon" },
-						children: [{ type: "text", value: "#" }],
+						children: [{ type: "text", value: "" }],
 					},
 				},
 			],
