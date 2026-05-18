@@ -80,200 +80,23 @@ const { code } = Astro.props;
     background: rgba(255,255,255,0.08);
     border-color: rgba(255,255,255,0.15);
   }
-  /* Ensure SVG text is visible */
+  /* Ensure SVG text is visible and responsive */
   .mermaid-svg-wrapper :global(svg) {
-    max-width: none !important;
+    max-width: 100% !important;
     height: auto !important;
+    display: block;
+    margin: 0 auto;
   }
   .mermaid-svg-wrapper :global(svg .node text),
   .mermaid-svg-wrapper :global(svg text) {
     font-family: system-ui, -apple-system, sans-serif !important;
   }
-
-  /* ─── Dark mode Mermaid comprehensive overrides ─── */
-  /* Target nodes by their inline style attribute which contains the fill color */
-
-  /* Red tones (#fecaca, #fee2e2, #fca5a5) → dark red */
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fecaca"]),
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fee2e2"]),
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fca5a5"]) {
-    --mermaid-dark-fill: #7f1d1d;
-    --mermaid-dark-stroke: #ef4444;
-    --mermaid-dark-text: #fca5a5;
-  }
-
-  /* Green tones (#bbf7d0, #86efac, #dcfce7) → dark green */
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#bbf7d0"]),
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#86efac"]),
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#dcfce7"]) {
-    --mermaid-dark-fill: #14532d;
-    --mermaid-dark-stroke: #22c55e;
-    --mermaid-dark-text: #86efac;
-  }
-
-  /* Blue tones (#dbeafe) → dark blue */
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#dbeafe"]) {
-    --mermaid-dark-fill: #1e3a5f;
-    --mermaid-dark-stroke: #3b82f6;
-    --mermaid-dark-text: #93c5fd;
-  }
-
-  /* Yellow/Cream tones (#fef3c7) → dark amber */
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fef3c7"]) {
-    --mermaid-dark-fill: #713f12;
-    --mermaid-dark-stroke: #f59e0b;
-    --mermaid-dark-text: #fcd34d;
-  }
-
-  /* Purple tones (#e9d5ff) → dark purple */
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#e9d5ff"]) {
-    --mermaid-dark-fill: #581c87;
-    --mermaid-dark-stroke: #a855f7;
-    --mermaid-dark-text: #d8b4fe;
-  }
-
-  /* Pink tones (#fce7f3) → dark pink */
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#fce7f3"]) {
-    --mermaid-dark-fill: #831843;
-    --mermaid-dark-stroke: #ec4899;
-    --mermaid-dark-text: #f9a8d4;
-  }
-
-  /* Apply dark colors to targeted nodes */
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"]) {
-    fill: var(--mermaid-dark-fill, #1f2937) !important;
-    stroke: var(--mermaid-dark-stroke, #6b7280) !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] rect),
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] circle),
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] polygon),
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] ellipse) {
-    fill: var(--mermaid-dark-fill, #1f2937) !important;
-    stroke: var(--mermaid-dark-stroke, #6b7280) !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] .label),
-  .dark .mermaid-svg-wrapper :global(svg .node[style*="fill:#"] .label text) {
-    fill: var(--mermaid-dark-text, #f3f4f6) !important;
-    color: var(--mermaid-dark-text, #f3f4f6) !important;
-  }
-
-  /* Default nodes (no custom fill) in dark mode */
-  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"])) rect,
-  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"])) circle,
-  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"])) polygon {
-    fill: #1f2937 !important;
-    stroke: #4b5563 !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"]) .label) {
-    color: #e5e7eb !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .node:not([style*="fill:#"]) .label text) {
-    fill: #e5e7eb !important;
-  }
-
-  /* Override Mermaid's inline text color */
-  .dark .mermaid-svg-wrapper :global(svg .node .label text) {
-    fill: #f3f4f6 !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .node .label span) {
-    color: #f3f4f6 !important;
-  }
-
-  /* Clusters/subgraphs */
-  .dark .mermaid-svg-wrapper :global(svg .cluster rect) {
-    fill: rgba(31, 41, 55, 0.6) !important;
-    stroke: #4b5563 !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .cluster .label) {
-    color: #d1d5db !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .cluster-label text) {
-    fill: #9ca3af !important;
-  }
-
-  /* Edge labels */
-  .dark .mermaid-svg-wrapper :global(svg .edgeLabel rect) {
-    fill: #1f2937 !important;
-    stroke: #4b5563 !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .edgeLabel .label) {
-    color: #e5e7eb !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .edgeLabel text) {
-    fill: #e5e7eb !important;
-  }
-
-  /* Lines and arrows */
-  .dark .mermaid-svg-wrapper :global(svg .flowchart-link) {
-    stroke: #9ca3af !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg .edgePath .path) {
-    stroke: #9ca3af !important;
-  }
-  .dark .mermaid-svg-wrapper :global(svg marker path) {
-    fill: #9ca3af !important;
-    stroke: #9ca3af !important;
-  }
-
-  /* Fullscreen dark overrides */
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fecaca"]),
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fee2e2"]),
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fca5a5"]) {
-    --mermaid-dark-fill: #7f1d1d;
-    --mermaid-dark-stroke: #ef4444;
-    --mermaid-dark-text: #fca5a5;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#bbf7d0"]),
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#86efac"]),
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#dcfce7"]) {
-    --mermaid-dark-fill: #14532d;
-    --mermaid-dark-stroke: #22c55e;
-    --mermaid-dark-text: #86efac;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#dbeafe"]) {
-    --mermaid-dark-fill: #1e3a5f;
-    --mermaid-dark-stroke: #3b82f6;
-    --mermaid-dark-text: #93c5fd;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fef3c7"]) {
-    --mermaid-dark-fill: #713f12;
-    --mermaid-dark-stroke: #f59e0b;
-    --mermaid-dark-text: #fcd34d;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#e9d5ff"]) {
-    --mermaid-dark-fill: #581c87;
-    --mermaid-dark-stroke: #a855f7;
-    --mermaid-dark-text: #d8b4fe;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#fce7f3"]) {
-    --mermaid-dark-fill: #831843;
-    --mermaid-dark-stroke: #ec4899;
-    --mermaid-dark-text: #f9a8d4;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"]) {
-    fill: var(--mermaid-dark-fill, #1f2937) !important;
-    stroke: var(--mermaid-dark-stroke, #6b7280) !important;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"] rect),
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"] circle),
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"] polygon) {
-    fill: var(--mermaid-dark-fill, #1f2937) !important;
-    stroke: var(--mermaid-dark-stroke, #6b7280) !important;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node[style*="fill:#"] .label text) {
-    fill: var(--mermaid-dark-text, #f3f4f6) !important;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .node:not([style*="fill:#"]) rect) {
-    fill: #1f2937 !important;
-    stroke: #4b5563 !important;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .cluster rect) {
-    fill: rgba(31, 41, 55, 0.6) !important;
-    stroke: #4b5563 !important;
-  }
-  .dark .mermaid-fullscreen-diagram :global(svg .edgeLabel rect) {
-    fill: #1f2937 !important;
-    stroke: #4b5563 !important;
+  /* Fix text clipping in nodes */
+  .mermaid-svg-wrapper :global(svg .node rect),
+  .mermaid-svg-wrapper :global(svg .node circle),
+  .mermaid-svg-wrapper :global(svg .node polygon) {
+    rx: 4px;
+    ry: 4px;
   }
 
   /* Fullscreen overlay */
@@ -369,15 +192,32 @@ const { code } = Astro.props;
     const isDark = getTheme() === "dark";
     mermaid.initialize({
       startOnLoad: false,
-      theme: "base",
-      themeVariables: {
-        primaryColor: isDark ? "#1f2937" : "#f3f4f6",
-        primaryTextColor: isDark ? "#f3f4f6" : "#1f2937",
-        primaryBorderColor: isDark ? "#6b7280" : "#d1d5db",
-        lineColor: isDark ? "#9ca3af" : "#6b7280",
-        secondaryColor: isDark ? "#374151" : "#e5e7eb",
-        tertiaryColor: isDark ? "#1f2937" : "#f9fafb",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+      theme: isDark ? "dark" : "default",
+      themeVariables: isDark
+        ? {
+            // Dark theme overrides for better contrast
+            primaryColor: "#1e293b",
+            primaryTextColor: "#e2e8f0",
+            primaryBorderColor: "#475569",
+            lineColor: "#94a3b8",
+            secondaryColor: "#334155",
+            tertiaryColor: "#0f172a",
+            fontFamily: "system-ui, -apple-system, sans-serif",
+          }
+        : {
+            primaryColor: "#f3f4f6",
+            primaryTextColor: "#1f2937",
+            primaryBorderColor: "#d1d5db",
+            lineColor: "#6b7280",
+            secondaryColor: "#e5e7eb",
+            tertiaryColor: "#f9fafb",
+            fontFamily: "system-ui, -apple-system, sans-serif",
+          },
+      flowchart: {
+        padding: 12,
+        nodeSpacing: 50,
+        rankSpacing: 50,
+        useMaxWidth: false,
       },
     });
 
@@ -397,11 +237,11 @@ const { code } = Astro.props;
 
         const svgEl = scaleWrap.querySelector("svg");
         if (svgEl) {
-          svgEl.style.maxWidth = "none";
+          svgEl.style.maxWidth = "100%";
           svgEl.style.height = "auto";
-          // Apply dark mode color overrides directly to SVG
+          fixNodeTextClipping(svgEl, scaleWrap);
           if (isDark) {
-            applyDarkModeColors(svgEl);
+            fixSubgraphLabels(svgEl);
           }
         }
       } catch (err) {
@@ -411,84 +251,81 @@ const { code } = Astro.props;
     }
   }
 
-  // Color mapping for dark mode
-  const darkColorMap: Record<string, { fill: string; stroke: string; text: string }> = {
-    "#fecaca": { fill: "#7f1d1d", stroke: "#ef4444", text: "#fca5a5" },
-    "#fee2e2": { fill: "#7f1d1d", stroke: "#ef4444", text: "#fca5a5" },
-    "#fca5a5": { fill: "#7f1d1d", stroke: "#ef4444", text: "#fca5a5" },
-    "#bbf7d0": { fill: "#14532d", stroke: "#22c55e", text: "#86efac" },
-    "#86efac": { fill: "#14532d", stroke: "#22c55e", text: "#86efac" },
-    "#dcfce7": { fill: "#14532d", stroke: "#22c55e", text: "#86efac" },
-    "#dbeafe": { fill: "#1e3a5f", stroke: "#3b82f6", text: "#93c5fd" },
-    "#fef3c7": { fill: "#713f12", stroke: "#f59e0b", text: "#fcd34d" },
-    "#e9d5ff": { fill: "#581c87", stroke: "#a855f7", text: "#d8b4fe" },
-    "#fce7f3": { fill: "#831843", stroke: "#ec4899", text: "#f9a8d4" },
-  };
+  function fixNodeTextClipping(svgEl: SVGElement, wrapperEl: HTMLElement) {
+    // Ensure SVG doesn't clip content
+    svgEl.setAttribute("overflow", "visible");
 
-  function applyDarkModeColors(svgEl: SVGElement) {
-    // Override the SVG's internal style block
-    const styleEl = svgEl.querySelector("style");
-    if (styleEl) {
-      let css = styleEl.textContent || "";
-      // Replace default light colors with dark ones
-      css = css.replace(/fill:#f3f4f6/g, "fill:#1f2937");
-      css = css.replace(/stroke:#d1d5db/g, "stroke:#4b5563");
-      css = css.replace(/fill:#1f2937/g, "fill:#f3f4f6"); // text color
-      css = css.replace(/color:#1f2937/g, "color:#f3f4f6");
-      css = css.replace(/fill:#e5e7eb/g, "fill:#1f2937"); // edge label bg
-      css = css.replace(/fill:#6b7280/g, "fill:#9ca3af"); // lines
-      css = css.replace(/stroke:#6b7280/g, "stroke:#9ca3af");
-      styleEl.textContent = css;
-    }
-
-    // Process nodes with custom fill colors
+    // For each node, ensure the foreignObject label is not clipped
     svgEl.querySelectorAll<SVGGElement>(".node").forEach((node) => {
-      const nodeStyle = node.getAttribute("style") || "";
-      const match = nodeStyle.match(/fill:([^\s!]+)/);
-      if (match) {
-        const originalColor = match[1].toLowerCase();
-        const darkColors = darkColorMap[originalColor];
-        if (darkColors) {
-          // Update the node's rect/circle/polygon fill
-          const shape = node.querySelector("rect, circle, polygon, ellipse");
-          if (shape) {
-            shape.setAttribute("fill", darkColors.fill);
-            shape.setAttribute("stroke", darkColors.stroke);
-          }
-          // Update text color
-          const label = node.querySelector(".label");
-          if (label) {
-            const textEls = label.querySelectorAll("text, span");
-            textEls.forEach((t) => {
-              (t as HTMLElement).style.fill = darkColors.text;
-              (t as HTMLElement).style.color = darkColors.text;
-            });
-          }
-        }
-      } else {
-        // Default node (no custom fill) - make it dark
-        const shape = node.querySelector("rect, circle, polygon, ellipse");
-        if (shape) {
-          shape.setAttribute("fill", "#1f2937");
-          shape.setAttribute("stroke", "#4b5563");
-        }
-        const label = node.querySelector(".label");
-        if (label) {
-          const textEls = label.querySelectorAll("text, span");
-          textEls.forEach((t) => {
-            (t as HTMLElement).style.fill = "#e5e7eb";
-            (t as HTMLElement).style.color = "#e5e7eb";
-          });
+      const label = node.querySelector(".label");
+      if (!label) return;
+
+      const foreignObj = label.querySelector("foreignObject");
+      if (foreignObj) {
+        foreignObj.setAttribute("overflow", "visible");
+        const div = foreignObj.querySelector("div");
+        if (div) {
+          div.style.overflow = "visible";
+          div.style.lineHeight = "1.5";
         }
       }
     });
 
-    // Process clusters
+    // Adjust wrapper width to match SVG aspect ratio for better display
+    // Use viewBox or width/height attributes since getBBox may fail
+    const viewBox = svgEl.getAttribute("viewBox");
+    let svgWidth = 0;
+    let svgHeight = 0;
+    if (viewBox) {
+      const parts = viewBox.split(/[\s,]+/).map(Number);
+      if (parts.length >= 4) {
+        svgWidth = parts[2];
+        svgHeight = parts[3];
+      }
+    }
+    if (!svgWidth || !svgHeight) {
+      svgWidth = parseFloat(svgEl.getAttribute("width") || "0");
+      svgHeight = parseFloat(svgEl.getAttribute("height") || "0");
+    }
+    if (svgWidth && svgHeight) {
+      const ratio = svgWidth / svgHeight;
+      // Constrain ratio between 3:4 and 4:3
+      const minRatio = 3 / 4;
+      const maxRatio = 4 / 3;
+      const clampedRatio = Math.max(minRatio, Math.min(maxRatio, ratio));
+      // Set wrapper max-width based on aspect ratio
+      // For tall charts (small ratio), use narrower wrapper
+      // For wide charts (large ratio), use full width
+      const containerWidth = wrapperEl.parentElement?.clientWidth || 800;
+      if (clampedRatio < 1) {
+        // Tall chart: set wrapper width proportional to ratio
+        const targetWidth = containerWidth * clampedRatio;
+        wrapperEl.style.maxWidth = targetWidth + "px";
+      } else {
+        wrapperEl.style.maxWidth = containerWidth + "px";
+      }
+    }
+  }
+
+  function fixSubgraphLabels(svgEl: SVGElement) {
+    // In dark mode, subgraph/cluster labels use white text which is hard to read
+    // on light colored backgrounds. Add a dark text shadow for contrast.
+    svgEl.querySelectorAll<SVGGElement>(".cluster-label").forEach((labelGroup) => {
+      const textEls = labelGroup.querySelectorAll("text");
+      textEls.forEach((textEl) => {
+        textEl.style.fill = "#1f2937";
+        textEl.style.fontWeight = "600";
+      });
+    });
+    // Also fix any title/label text inside clusters
     svgEl.querySelectorAll<SVGGElement>(".cluster").forEach((cluster) => {
-      const rect = cluster.querySelector("rect");
-      if (rect) {
-        rect.setAttribute("fill", "rgba(31, 41, 55, 0.5)");
-        rect.setAttribute("stroke", "#4b5563");
+      const label = cluster.querySelector(".label");
+      if (label) {
+        const textEls = label.querySelectorAll("text, span");
+        textEls.forEach((t) => {
+          (t as HTMLElement).style.fill = "#1f2937";
+          (t as HTMLElement).style.color = "#1f2937";
+        });
       }
     });
   }
