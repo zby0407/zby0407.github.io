@@ -1,7 +1,7 @@
 ---
 import PageLayout from "@/layouts/Base.astro";
 import { getCollection, render } from "astro:content";
-import { getNavLink } from "@/lib/blog-helpers";
+import { getNavLink, getPostLink } from "@/lib/blog-helpers";
 import type { GetStaticPaths } from "astro";
 import FormattedDate from "@/components/ui/FormattedDate.astro";
 import TOC from "@/components/blog/TOC.astro";
@@ -10,14 +10,30 @@ import Icon from "@/components/ui/Icon.astro";
 import { areDifferentDates } from "@/utils/date";
 
 export const getStaticPaths = (async () => {
-  const posts = await getCollection("posts");
-  return posts.map((post) => ({
-    params: { slug: post.id },
-    props: { post },
-  }));
+  const posts = (await getCollection("posts"))
+    .filter((p) => !p.data.hidden && !p.data.draft)
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+  return posts.map((post, index) => {
+    const prevPost = index > 0 ? posts[index - 1] : null;
+    const nextPost = index < posts.length - 1 ? posts[index + 1] : null;
+
+    return {
+      params: { slug: post.id },
+      props: {
+        post,
+        prevPost: prevPost
+          ? { title: prevPost.data.title, slug: prevPost.id }
+          : null,
+        nextPost: nextPost
+          ? { title: nextPost.data.title, slug: nextPost.id }
+          : null,
+      },
+    };
+  });
 }) satisfies GetStaticPaths;
 
-const { post } = Astro.props;
+const { post, prevPost, nextPost } = Astro.props;
 const { Content, headings } = await render(post);
 
 const dateTimeOptions: Intl.DateTimeFormatOptions = {
@@ -82,6 +98,36 @@ const showToc = post.data.toc !== false && headings.length > 0;
           <Content />
         </div>
       </div>
+      {(prevPost || nextPost) && (
+        <nav class="post-nav" aria-label="文章导航">
+          {prevPost && (
+            <a
+              class="post-nav-link post-nav-prev"
+              href={getPostLink(`blog/${prevPost.slug}`)}
+              data-astro-prefetch
+            >
+              <span class="post-nav-label">
+                <Icon class="h-4 w-4" name="before" aria-hidden="true" focusable="false" />
+                上一篇
+              </span>
+              <span class="post-nav-title">{prevPost.title}</span>
+            </a>
+          )}
+          {nextPost && (
+            <a
+              class="post-nav-link post-nav-next"
+              href={getPostLink(`blog/${nextPost.slug}`)}
+              data-astro-prefetch
+            >
+              <span class="post-nav-label">
+                下一篇
+                <Icon class="h-4 w-4" name="next" aria-hidden="true" focusable="false" />
+              </span>
+              <span class="post-nav-title">{nextPost.title}</span>
+            </a>
+          )}
+        </nav>
+      )}
     </article>
     {showToc && <TOC headings={headings} />}
   </div>

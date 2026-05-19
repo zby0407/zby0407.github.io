@@ -356,6 +356,11 @@ const { code } = Astro.props;
     activeSvg = svg.cloneNode(true) as SVGElement;
     activeSvg.style.maxWidth = "none";
     activeSvg.style.height = "auto";
+    // Re-apply dark mode fixes to cloned SVG
+    const isDark = getTheme() === "dark";
+    if (isDark) {
+      fixSubgraphLabels(activeSvg);
+    }
     fullscreenDiagram.appendChild(activeSvg);
 
     fullscreenScale = 1;
